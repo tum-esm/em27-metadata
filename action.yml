@@ -35,12 +35,14 @@ runs:
         - name: Install dependencies
           if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
           run: poetry install --with=dev
+          shell: bash
 
         # run tests
         - name: Run pytests
           env:
-              GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
-              GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              GITHUB_REPOSITORY: ${{ github.action_repository }}
+              GITHUB_ACCESS_TOKEN: ${{ github.token }}
               GITHUB_WORKSPACE: ${{ github.workspace }}
               GITHUB_ACTION_PATH: ${{ github.action_path }}
           run: .venv/bin/python -m pytest ${{ github.action_path }}/tests -m "action"
+          shell: bash
