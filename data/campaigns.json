@@ -1,0 +1,11 @@
+[
+    {
+        "campaign_id": "ci1",
+        "from_date": "20190913",
+        "to_date": "21000101",
+        "stations": [
+            { "sensor_id": "sid1", "default_location_id": "LOC1", "direction": "north" },
+            { "sensor_id": "sid2", "default_location_id": "LOC2", "direction": "south" }
+        ]
+    }
+]

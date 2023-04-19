@@ -5,14 +5,13 @@ from os.path import dirname
 import pytest
 from tum_esm_em27_metadata import interfaces, types, ALLOWED_EXTRA_PRESSURE_DATA_SOURCES
 
+DATA_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "data")
+
 
 @pytest.mark.ci
 @pytest.mark.action
 @pytest.mark.local
 def test_data_integrity() -> None:
-    PROJECT_DIR = os.getenv("GITHUB_REPO_PATH", dirname(dirname(os.path.abspath(__file__))))
-    DATA_DIR = os.path.join(PROJECT_DIR, "data")
-
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
         locations = [types.Location(**l) for l in json.load(f)]
 
