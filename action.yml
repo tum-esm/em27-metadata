@@ -9,14 +9,15 @@ runs:
 
         # move all library files into working directory; this makes
         # testing easier whebecausen we don't have to worry about
-        # different paths for the repo and the action
+        # different paths for the repo and the action. Copying the
+        # README is required for the poetry install command
         - name: Copy action files
           run: |
               cp -r ${{ github.action_path }}/tests .
               cp -r ${{ github.action_path }}/tum_esm_em27_metadata .
               cp ${{ github.action_path }}/pyproject.toml .
               cp ${{ github.action_path }}/poetry.lock .
-              ls -lahg .
+              cp ${{ github.action_path }}/README .
           shell: bash
 
         # load cached venv if cache exists
