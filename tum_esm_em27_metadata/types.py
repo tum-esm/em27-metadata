@@ -31,7 +31,7 @@ class Location(BaseModel):
         extra = "ignore"
 
 
-class SensorUTCOffset(BaseModel):
+class SensorDifferentUTCOffset(BaseModel):
     from_date: str
     to_date: str
     utc_offset: float
@@ -48,7 +48,7 @@ class SensorUTCOffset(BaseModel):
         extra = "ignore"
 
 
-class SensorPressureCalibrationFactor(BaseModel):
+class SensorDifferentPressureCalibrationFactor(BaseModel):
     from_date: str
     to_date: str
     factor: float
@@ -102,9 +102,9 @@ class SensorLocation(BaseModel):
 class Sensor(BaseModel):
     sensor_id: str
     serial_number: int
-    utc_offsets: list[SensorUTCOffset]
-    different_pressure_data_source: list[SensorDifferentPressureDataSource]
-    pressure_calibration_factors: list[SensorPressureCalibrationFactor]
+    different_utc_offsets: list[SensorDifferentUTCOffset]
+    different_pressure_data_sources: list[SensorDifferentPressureDataSource]
+    different_pressure_calibration_factors: list[SensorDifferentPressureCalibrationFactor]
     locations: list[SensorLocation]
 
     # validators

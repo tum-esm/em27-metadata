@@ -5,7 +5,7 @@
         "different_utc_offsets": [
             { "from_date": "20200826", "to_date": "20200926", "utc_offset": 2 }
         ],
-        "different_pressure_data_source": [
+        "different_pressure_data_sources": [
             {
                 "from_date": "20200826",
                 "to_date": "20200830",
@@ -16,16 +16,30 @@
             { "from_date": "20200826", "to_date": "20201001", "factor": 1.001 }
         ],
         "locations": [
-            { "from_date": "20200826", "to_date": "20200926", "location_id": "LOC1" },
-            { "from_date": "20200927", "to_date": "20201001", "location_id": "LOC2" }
+            {
+                "from_date": "20200826",
+                "to_date": "20200926",
+                "location_id": "LOC1"
+            },
+            {
+                "from_date": "20200927",
+                "to_date": "20201001",
+                "location_id": "LOC2"
+            }
         ]
     },
     {
         "sensor_id": "sid2",
         "serial_number": 51,
         "different_utc_offsets": [],
-        "different_pressure_data_source": [],
+        "different_pressure_data_sources": [],
         "different_pressure_calibration_factors": [],
-        "locations": [{ "from_date": "20200826", "to_date": "20201001", "location_id": "LOC1" }]
+        "locations": [
+            {
+                "from_date": "20200826",
+                "to_date": "20201001",
+                "location_id": "LOC1"
+            }
+        ]
     }
 ]

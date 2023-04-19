@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 import json
 from typing import Any, Callable, Optional, Union
+from pydantic import BaseModel
 import tum_esm_utils
 from tum_esm_em27_metadata import types
+import pendulum
 
 
 class EM27MetadataInterface:
@@ -53,50 +55,50 @@ class EM27MetadataInterface:
         sensor = list(filter(lambda s: s.sensor_id == sensor_id, self.sensors))[0]
 
         # get utc offset
-        utc_offset_matches = list(
-            filter(
-                lambda o: o.from_date <= date <= o.to_date,
-                sensor.utc_offsets,
-            )
-        )
-        assert len(utc_offset_matches) == 1, f"no utc offset data for {sensor_id}/{date}"
-        utc_offset = utc_offset_matches[0].utc_offset
+        try:
+            utc_offset = next(
+                filter(
+                    lambda o: o.from_date <= date <= o.to_date,
+                    sensor.different_utc_offsets,
+                )
+            ).utc_offset
+        except StopIteration:
+            utc_offset = 0
 
         # get pressure data source
-        pressure_data_source_matches = list(
-            filter(
-                lambda o: o.from_date <= date <= o.to_date,
-                sensor.different_pressure_data_source,
-            )
-        )
-        pressure_data_source = (
-            sensor_id
-            if len(pressure_data_source_matches) == 0
-            else pressure_data_source_matches[0].source
-        )
+        try:
+            pressure_data_source = next(
+                filter(
+                    lambda o: o.from_date <= date <= o.to_date,
+                    sensor.different_pressure_data_sources,
+                )
+            ).source
+        except StopIteration:
+            pressure_data_source = sensor_id
 
         # get pressure calibration factor
-        pressure_calibration_factor_matches = list(
-            filter(
-                lambda o: o.from_date <= date <= o.to_date,
-                sensor.pressure_calibration_factors,
-            )
-        )
-        assert (
-            len(pressure_calibration_factor_matches) == 1
-        ), f"no pressure calibration data for {sensor_id}/{date}"
-        pressure_calibration_factor = pressure_calibration_factor_matches[0].factor
+        try:
+            pressure_calibration_factor = next(
+                filter(
+                    lambda o: o.from_date <= date <= o.to_date,
+                    sensor.different_pressure_calibration_factors,
+                )
+            ).factor
+        except StopIteration:
+            pressure_calibration_factor = 1
 
         # get location at that date
-        location_matches = list(
-            filter(
-                lambda l: l.from_date <= date <= l.to_date,
-                sensor.locations,
-            )
-        )
-        assert len(location_matches) == 1, f"no location data for {sensor_id}/{date}"
-        location_id = location_matches[0].location_id
-        location = list(filter(lambda l: l.location_id == location_id, self.locations))[0]
+        try:
+            location_id = next(
+                filter(
+                    lambda l: l.from_date <= date <= l.to_date,
+                    sensor.locations,
+                )
+            ).location_id
+        except StopIteration:
+            raise AssertionError(f"no location data for {sensor_id}/{date}")
+
+        location = next(filter(lambda l: l.location_id == location_id, self.locations))
 
         # bundle the context
         return types.SensorDataContext(
@@ -116,7 +118,7 @@ def load_from_github(
 ) -> EM27MetadataInterface:
     """loads an EM27MetadataInterface from GitHub"""
 
-    _req: Callable[[str], list[Any]] = lambda t: json.loads(
+    _req: Callable[[str], Any] = lambda t: json.loads(
         tum_esm_utils.github.request_github_file(
             github_repository=github_repository,
             filepath=f"data/{t}.json",
@@ -131,7 +133,9 @@ def load_from_github(
     )
 
 
-ALLOWED_EXTRA_PRESSURE_DATA_SOURCES = ["LMU-MIM01-height-adjusted"]
+class _DatetimeSeriesItem(BaseModel):
+    from_date: pendulum.DateTime
+    to_date: pendulum.DateTime
 
 
 def _test_data_integrity(
@@ -149,79 +153,33 @@ def _test_data_integrity(
     assert len(set(campaign_ids)) == len(campaign_ids), "campaign ids are not unique"
 
     # reference existence in sensors.json
-    for s in sensors:
-        for l in s.locations:
-            assert l.location_id in location_ids, f"unknown location id {l.location_id}"
-        for p in s.different_pressure_data_source:
-            assert p.source in (
-                sensor_ids + ALLOWED_EXTRA_PRESSURE_DATA_SOURCES
-            ), f"unknown pressure data source {p.source}"
+    for s1 in sensors:
+        for l1 in s1.locations:
+            assert l1.location_id in location_ids, f"unknown location id {l1.location_id}"
 
     # reference existence in campaigns.json
-    for c in campaigns:
-        for s2 in c.stations:
+    for c1 in campaigns:
+        for s2 in c1.stations:
             assert (
                 s2.default_location_id in location_ids
             ), f"unknown location id {s2.default_location_id}"
             assert s2.sensor_id in sensor_ids, f"unknown sensor id {s2.sensor_id}"
 
     # integrity of time series in sensors.json
-    for s in sensors:
+    for s3 in sensors:
+        for location_timeseries in [
+            [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.locations],
+            [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_utc_offsets],
+            [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_pressure_data_sources],
+            [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_pressure_calibration_factors],
+        ]:
+            for l3 in location_timeseries:
+                assert (
+                    l3.from_date < l3.to_date
+                ), f"from_datetime ({l3.from_date}) has to smaller than to_datetime ({l3.to_date})"
 
-        # TEST TIME SERIES INTEGRITY OF "utc_offsets",
-        # "pressure_calibration_factors", and "locations"
-        xss: list[
-            Union[
-                list[types.SensorUTCOffset],
-                list[types.SensorPressureCalibrationFactor],
-                list[types.SensorLocation],
-            ]
-        ] = [s.utc_offsets, s.pressure_calibration_factors, s.locations]
-        for xs in xss:
-            for x in xs:
-                assert x.from_date <= x.to_date, (
-                    "from_date has to smaller than to_date " + f"({x.from_date} > {x.to_date})"
-                )
-            for i in range(len(xs) - 1):
-                x1, x2 = xs[i : i + 2]
-                expected_x2_from_date = (
-                    datetime.strptime(x1.to_date, "%Y%m%d") + timedelta(days=1)
-                ).strftime("%Y%m%d")
-                assert not (
-                    expected_x2_from_date > x2.from_date
-                ), f"time periods are overlapping: {x1.dict()}, {x1.dict()}"
-                assert not (
-                    expected_x2_from_date < x2.from_date
-                ), f"time periods have gaps: {x1.dict()}, {x1.dict()}"
-
-        # TEST TIME SERIES INTEGRITY OF "different_pressure_data_source"
-        for x in s.different_pressure_data_source:
-            assert x.from_date <= x.to_date, (
-                "from_date has to smaller than to_date " + f"({x.from_date} > {x.to_date})"
-            )
-        for i in range(len(s.different_pressure_data_source) - 1):
-            x1, x2 = s.different_pressure_data_source[i : i + 2]
-            expected_x2_from_date = (
-                datetime.strptime(x1.to_date, "%Y%m%d") + timedelta(days=1)
-            ).strftime("%Y%m%d")
-            assert not (
-                expected_x2_from_date > x2.from_date
-            ), f"time periods are overlapping: {x1.dict()}, {x1.dict()}"
-
-        # TEST INTEGRITY OF ADJACENT "utc_offset" ITEMS
-        for o1, o2 in zip(s.utc_offsets[:-1], s.utc_offsets[1:]):
-            assert (
-                o1.utc_offset != o2.utc_offset
-            ), "two neighboring date ranges should not have the same utc_offset"
-
-        # TEST INTEGRITY OF ADJACENT "pressure_calibration_factors" ITEMS
-        for p1, p2 in zip(s.pressure_calibration_factors[:-1], s.pressure_calibration_factors[1:]):
-            assert (
-                p1.factor != p2.factor
-            ), "two neighboring date ranges should not have the same pressure calibration factor"
-
-        # TEST INTEGRITY OF ADJACENT "locations" ITEMS
-        for l1, l2 in zip(s.locations[:-1], s.locations[1:]):
-            assert (
-                l1.location_id != l2.location_id
-            ), "two neighboring date ranges should not have the same location_id"
+            for i in range(len(location_timeseries) - 1):
+                l1_, l2_ = location_timeseries[i : i + 2]
+                assert (
+                    l1_.to_date <= l2_.from_date
+                ), f"time periods are overlapping: {l1_.dict()}, {l1_.dict()}"
