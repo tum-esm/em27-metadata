@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "tum_esm_em27_metadata"
+version = "1.0.1"
+description = "Single source of truth for ESM's EM27 measurement logistics"
+readme = "README.md"
+authors = [
+    "Moritz Makowski <moritz.makowski@tum.de>",
+    "Marlon Mueller <marlon.mueller@tum.de>"
+]
+packages = [
+    {include = "tum_esm_em27_metadata"},
+    {include = "tum_esm_em27_metadata/py.typed"},
+]
+repository = "https://github.com/tum-esm/em27-metadata"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^1.10.4"
+tum-esm-utils = "^1.0.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^0.991"
+pytest = "^7.2.1"
+black = "^22.12.0"
+python-dotenv = "^0.21.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length=100
+
+[tool.mypy]
+strict = true
+implicit_reexport = true
+no_warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+markers = [
+    "ci: can be run in GitHub CI",
+    "action: can be run when using this repo as a GitHub Action",
+    "local: can be run locally"
+]
