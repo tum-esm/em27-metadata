@@ -2,13 +2,25 @@
 
 ## The purpose of this library
 
-TODO: write
+This repository is the single source of truth for our EM27 measurement logistics: "Where has each station been on each day of measurements?" We selected this format over putting it in a database due to various reasons:
+
+-   Easy to read, modify and extend by selective group members using GitHub permissions
+-   Changes to this are more evident here than in database logs
+-   Versioning (easy to revert mistakes)
+-   Automatic testing of the files integrities
+-   Easy import as a statically typed Python library
+
+<br/>
+
+## How it works
+
+This repository only contains a Python library to interact with the metadata. The metadata itself is stored in local files or a GitHub repository. The library can load the metadata from both sources and provides a unified interface with static types to access it.
 
 <br/>
 
 ## Library Usage
 
-Install as a library
+Install as a library:
 
 ```bash
 poetry add tum-esm-em27-metadata
@@ -33,12 +45,12 @@ em27_metadata = tum_esm_em27_metadata.load_from_local_files(
 
 metadata = em27_metadata.get(
     sensor_id = "ma", date = "20220601"
-)  # is of type tum_esm_em27_metadata.types.SensorDataContext
+)
 
 print(metadata.dict())
 ```
 
-prints out:
+Prints out:
 
 ```json
 {
@@ -59,8 +71,12 @@ prints out:
 }
 ```
 
+The object returned by `em27_metadata.get()` is of type `tum_esm_em27_metadata.types.SensorDataContext`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.dict()`.
+
+You can find dummy data in the `data/` folder.
+
 <br/>
 
 ## Set up an EM27 Metadata Storage Directory
 
-TODO: write
+You can use the repository https://github.com/tum-esm/em27-metadata-storage-template to create your own repository for storing the metadata. It contains a GitHub Actions workflow that automatically validates the metadata on every commit in any branch.
