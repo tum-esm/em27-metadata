@@ -1,2 +1,3 @@
 from . import types
-from .interfaces import EM27MetadataInterface, load_from_github
+from .interfaces import EM27MetadataInterface
+from .loader import load_from_github
