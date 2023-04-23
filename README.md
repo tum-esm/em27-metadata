@@ -80,3 +80,27 @@ You can find dummy data in the `data/` folder.
 ## Set up an EM27 Metadata Storage Directory
 
 You can use the repository https://github.com/tum-esm/em27-metadata-storage-template to create your own repository for storing the metadata. It contains a GitHub Actions workflow that automatically validates the metadata on every commit in any branch.
+
+<br/>
+
+## For Developers
+
+Run tests:
+
+```bash
+# used inside the GitHub CI for this repo
+pytest -m "ci"
+
+# used inside the GitHub Actions workflow for storage repos
+pytest -m "action"
+
+# can be used for local development (skips pulling from GitHub)
+pytest -m "local"
+```
+
+Publish the Package to PyPI:
+
+```bash
+poetry build
+poetry publish
+```
