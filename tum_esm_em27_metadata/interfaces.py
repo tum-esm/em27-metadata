@@ -6,9 +6,9 @@ import pendulum
 class EM27MetadataInterface:
     def __init__(
         self,
-        locations: list[types.Location],
-        sensors: list[types.Sensor],
-        campaigns: list[types.Campaign],
+        locations: list[types.LocationMetadata],
+        sensors: list[types.SensorMetadata],
+        campaigns: list[types.CampaignMetadata],
     ):
         self.locations = locations
         self.sensors = sensors
@@ -48,7 +48,7 @@ class EM27MetadataInterface:
 
         # get the sensor
         assert sensor_id in self.sensor_ids, f'No location data for sensor_id "{sensor_id}"'
-        sensor = list(filter(lambda s: s.sensor_id == sensor_id, self.sensors))[0]
+        sensor = next(filter(lambda s: s.sensor_id == sensor_id, self.sensors))
 
         # get utc offset
         try:
@@ -83,6 +83,17 @@ class EM27MetadataInterface:
         except StopIteration:
             pressure_calibration_factor = 1
 
+        # get output calibration factor
+        try:
+            output_calibration_factor = next(
+                filter(
+                    lambda o: o.from_date <= date <= o.to_date,
+                    sensor.different_output_calibration_factors,
+                )
+            ).factor
+        except StopIteration:
+            output_calibration_factor = 1
+
         # get location at that date
         try:
             location_id = next(
@@ -92,9 +103,15 @@ class EM27MetadataInterface:
                 )
             ).location_id
         except StopIteration:
-            raise AssertionError(f"no location data for {sensor_id}/{date}")
+            raise ValueError(f"no location data for {sensor_id}/{date}")
 
-        location = next(filter(lambda l: l.location_id == location_id, self.locations))
+        try:
+            location = next(filter(lambda l: l.location_id == location_id, self.locations))
+        except StopIteration:
+            raise ValueError(
+                f"unknown location id {location_id}, this is a bug "
+                + "and should normally be tested at load-time"
+            )
 
         # bundle the context
         return types.SensorDataContext(
@@ -103,6 +120,7 @@ class EM27MetadataInterface:
             utc_offset=utc_offset,
             pressure_data_source=pressure_data_source,
             pressure_calibration_factor=pressure_calibration_factor,
+            output_calibration_factor=output_calibration_factor,
             date=date,
             location=location,
         )
@@ -114,9 +132,9 @@ class _DatetimeSeriesItem(BaseModel):
 
 
 def _test_data_integrity(
-    locations: list[types.Location],
-    sensors: list[types.Sensor],
-    campaigns: list[types.Campaign],
+    locations: list[types.LocationMetadata],
+    sensors: list[types.SensorMetadata],
+    campaigns: list[types.CampaignMetadata],
 ) -> None:
     location_ids = [s.location_id for s in locations]
     sensor_ids = [s.sensor_id for s in sensors]
@@ -147,6 +165,7 @@ def _test_data_integrity(
             [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_utc_offsets],
             [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_pressure_data_sources],
             [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_pressure_calibration_factors],
+            [_DatetimeSeriesItem(**l2.dict()) for l2 in s3.different_output_calibration_factors],
         ]:
             for l3 in location_timeseries:
                 assert (

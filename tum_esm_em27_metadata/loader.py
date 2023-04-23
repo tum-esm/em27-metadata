@@ -19,9 +19,9 @@ def load_from_github(
     )
 
     return interfaces.EM27MetadataInterface(
-        locations=[types.Location(**l) for l in _req("locations")],
-        sensors=[types.Sensor(**l) for l in _req("sensors")],
-        campaigns=[types.Campaign(**l) for l in _req("campaigns")],
+        locations=[types.LocationMetadata(**l) for l in _req("locations")],
+        sensors=[types.SensorMetadata(**l) for l in _req("sensors")],
+        campaigns=[types.CampaignMetadata(**l) for l in _req("campaigns")],
     )
 
 
@@ -55,7 +55,7 @@ def load_from_local_files(
     campaigns = _load_json_list(campaigns_path, "campaigns")
 
     return interfaces.EM27MetadataInterface(
-        locations=[types.Location(**l) for l in locations],
-        sensors=[types.Sensor(**l) for l in sensors],
-        campaigns=[types.Campaign(**l) for l in campaigns],
+        locations=[types.LocationMetadata(**l) for l in locations],
+        sensors=[types.SensorMetadata(**l) for l in sensors],
+        campaigns=[types.CampaignMetadata(**l) for l in campaigns],
     )

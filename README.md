@@ -47,6 +47,7 @@ prints out:
     "utc_offset": 0,
     "pressure_data_source": "ma",
     "pressure_calibration_factor": 1,
+    "output_calibration_factor": 1,
     "date": "20220601",
     "location": {
         "location_id": "TUM_I",

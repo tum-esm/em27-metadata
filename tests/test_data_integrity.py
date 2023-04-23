@@ -13,13 +13,13 @@ DATA_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "data")
 @pytest.mark.local
 def test_data_integrity() -> None:
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
-        locations = [types.Location(**l) for l in json.load(f)]
+        locations = [types.LocationMetadata(**l) for l in json.load(f)]
 
     with open(os.path.join(DATA_DIR, "sensors.json")) as f:
-        sensors = [types.Sensor(**l) for l in json.load(f)]
+        sensors = [types.SensorMetadata(**l) for l in json.load(f)]
 
     with open(os.path.join(DATA_DIR, "campaigns.json")) as f:
-        campaigns = [types.Campaign(**l) for l in json.load(f)]
+        campaigns = [types.CampaignMetadata(**l) for l in json.load(f)]
 
     location_data = interfaces.EM27MetadataInterface(locations, sensors, campaigns)
 

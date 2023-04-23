@@ -15,6 +15,9 @@
         "different_pressure_calibration_factors": [
             { "from_date": "20200826", "to_date": "20201001", "factor": 1.001 }
         ],
+        "different_output_calibration_factors": [
+            { "from_date": "20200826", "to_date": "20201001", "factor": 0.9995 }
+        ],
         "locations": [
             {
                 "from_date": "20200826",
@@ -34,6 +37,7 @@
         "different_utc_offsets": [],
         "different_pressure_data_sources": [],
         "different_pressure_calibration_factors": [],
+        "different_output_calibration_factors": [],
         "locations": [
             {
                 "from_date": "20200826",

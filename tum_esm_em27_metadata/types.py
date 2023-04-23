@@ -13,7 +13,6 @@ class _TimeSeriesElement(BaseModel):
 
 
 class SensorTypes:
-    @staticmethod
     class DifferentUTCOffset(_TimeSeriesElement):
         utc_offset: float
 
@@ -22,7 +21,6 @@ class SensorTypes:
             validate_float(minimum=-12, maximum=12),
         )
 
-    @staticmethod
     class DifferentPressureDataSource(_TimeSeriesElement):
         source: str
 
@@ -31,7 +29,6 @@ class SensorTypes:
             validate_str(),
         )
 
-    @staticmethod
     class DifferentPressureCalibrationFactor(_TimeSeriesElement):
         factor: float
 
@@ -40,7 +37,14 @@ class SensorTypes:
             validate_float(minimum=0.1, maximum=1.9),
         )
 
-    @staticmethod
+    class DifferentOutputCalibrationFactor(_TimeSeriesElement):
+        factor: float
+
+        # validators
+        _val_factor = validator("factor", pre=True, allow_reuse=True)(
+            validate_float(minimum=0.1, maximum=1.9),
+        )
+
     class Location(_TimeSeriesElement):
         location_id: str
 
@@ -51,7 +55,6 @@ class SensorTypes:
 
 
 class CampaignTypes:
-    @staticmethod
     class Station(BaseModel):
         sensor_id: str
         default_location_id: str
@@ -100,6 +103,7 @@ class SensorMetadata(BaseModel):
     different_utc_offsets: list[SensorTypes.DifferentUTCOffset]
     different_pressure_data_sources: list[SensorTypes.DifferentPressureDataSource]
     different_pressure_calibration_factors: list[SensorTypes.DifferentPressureCalibrationFactor]
+    different_output_calibration_factors: list[SensorTypes.DifferentOutputCalibrationFactor]
     locations: list[SensorTypes.Location]
 
     # validators
@@ -127,5 +131,6 @@ class SensorDataContext(BaseModel):
     utc_offset: float
     pressure_data_source: str
     pressure_calibration_factor: float
+    output_calibration_factor: float
     date: str
     location: LocationMetadata

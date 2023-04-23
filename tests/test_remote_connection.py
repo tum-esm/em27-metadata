@@ -1,6 +1,6 @@
 import os
 import pytest
-from tum_esm_em27_metadata import interfaces
+from tum_esm_em27_metadata import load_from_github
 
 
 @pytest.mark.ci
@@ -12,4 +12,4 @@ def test_remote_connection() -> None:
     assert github_repository is not None
     assert access_token is not None
 
-    interfaces.load_from_github(github_repository, access_token)
+    load_from_github(github_repository, access_token)
