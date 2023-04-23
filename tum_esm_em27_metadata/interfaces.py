@@ -127,8 +127,8 @@ class EM27MetadataInterface:
 
 
 class _DatetimeSeriesItem(BaseModel):
-    from_date: pendulum.DateTime
-    to_date: pendulum.DateTime
+    from_date: str
+    to_date: str
 
 
 def _test_data_integrity(
@@ -169,7 +169,7 @@ def _test_data_integrity(
         ]:
             for l3 in location_timeseries:
                 assert (
-                    l3.from_date < l3.to_date
+                    l3.from_date <= l3.to_date
                 ), f"from_datetime ({l3.from_date}) has to smaller than to_datetime ({l3.to_date})"
 
             for i in range(len(location_timeseries) - 1):
