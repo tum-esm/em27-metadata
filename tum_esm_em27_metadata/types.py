@@ -1,5 +1,5 @@
-from pydantic import BaseModel, validator
 from typing import Literal
+from pydantic import BaseModel, validator
 from tum_esm_utils.validators import validate_float, validate_int, validate_str
 
 
@@ -27,84 +27,59 @@ class Location(BaseModel):
         validate_float(minimum=-20, maximum=10000),
     )
 
-    class Config:
-        extra = "ignore"
 
-
-class SensorDifferentUTCOffset(BaseModel):
+class _TimeSeriesElement(BaseModel):
     from_date: str
     to_date: str
-    utc_offset: float
-
-    # validators
-    _val_date_string = validator(*["from_date", "to_date"], pre=True, allow_reuse=True,)(
-        validate_str(is_date_string=True),
-    )
-    _val_utc_offset = validator("utc_offset", pre=True, allow_reuse=True)(
-        validate_float(minimum=-12, maximum=12),
-    )
-
-    class Config:
-        extra = "ignore"
-
-
-class SensorDifferentPressureCalibrationFactor(BaseModel):
-    from_date: str
-    to_date: str
-    factor: float
-
-    # validators
-    _val_date_string = validator(*["from_date", "to_date"], pre=True, allow_reuse=True,)(
-        validate_str(is_date_string=True),
-    )
-    _val_factor = validator("factor", pre=True, allow_reuse=True)(
-        validate_float(minimum=0.1, maximum=10),
-    )
-
-    class Config:
-        extra = "ignore"
-
-
-class SensorDifferentPressureDataSource(BaseModel):
-    from_date: str
-    to_date: str
-    source: str
 
     # validators
     _val_date_string = validator("from_date", "to_date", pre=True, allow_reuse=True,)(
         validate_str(is_date_string=True),
     )
-    _val_date_string = validator("source", pre=True, allow_reuse=True,)(
+
+
+class SensorDifferentUTCOffsets(_TimeSeriesElement):
+    utc_offset: float
+
+    # validators
+    _val_utc_offset = validator("utc_offset", pre=True, allow_reuse=True)(
+        validate_float(minimum=-12, maximum=12),
+    )
+
+
+class SensorDifferentPressureCalibrationFactors(_TimeSeriesElement):
+    factor: float
+
+    # validators
+    _val_factor = validator("factor", pre=True, allow_reuse=True)(
+        validate_float(minimum=0.1, maximum=1.9),
+    )
+
+
+class SensorDifferentPressureDataSources(_TimeSeriesElement):
+    source: str
+
+    # validators
+    _val_source = validator("source", pre=True, allow_reuse=True,)(
         validate_str(),
     )
 
-    class Config:
-        extra = "ignore"
 
-
-class SensorLocation(BaseModel):
-    from_date: str
-    to_date: str
+class SensorLocation(_TimeSeriesElement):
     location_id: str
 
     # validators
-    _val_date_string = validator(*["from_date", "to_date"], pre=True, allow_reuse=True,)(
-        validate_str(is_date_string=True),
-    )
     _val_location_id = validator("location_id", pre=True, allow_reuse=True)(
         validate_str(),
     )
-
-    class Config:
-        extra = "ignore"
 
 
 class Sensor(BaseModel):
     sensor_id: str
     serial_number: int
-    different_utc_offsets: list[SensorDifferentUTCOffset]
-    different_pressure_data_sources: list[SensorDifferentPressureDataSource]
-    different_pressure_calibration_factors: list[SensorDifferentPressureCalibrationFactor]
+    different_utc_offsets: list[SensorDifferentUTCOffsets]
+    different_pressure_data_sources: list[SensorDifferentPressureDataSources]
+    different_pressure_calibration_factors: list[SensorDifferentPressureCalibrationFactors]
     locations: list[SensorLocation]
 
     # validators
@@ -115,40 +90,32 @@ class Sensor(BaseModel):
         validate_int(minimum=1),
     )
 
-    class Config:
-        extra = "ignore"
-
 
 class CampaignStation(BaseModel):
     sensor_id: str
     default_location_id: str
-    direction: Literal["north", "east", "south", "west", "center"]
+    direction: str
 
     # validators
-    _val_str = validator(*["sensor_id", "default_location_id"], pre=True, allow_reuse=True,)(
+    _val_str = validator(
+        "sensor_id",
+        "default_location_id",
+        "direction",
+        pre=True,
+        allow_reuse=True,
+    )(
         validate_str(),
     )
 
-    class Config:
-        extra = "ignore"
 
-
-class Campaign(BaseModel):
+class Campaign(_TimeSeriesElement):
     campaign_id: str
-    from_date: str
-    to_date: str
     stations: list[CampaignStation]
 
     # validators
     _val_campaign_id = validator("campaign_id", pre=True, allow_reuse=True)(
         validate_str(min_len=1, max_len=64, regex="^[a-z0-9_]+$"),
     )
-    _val_date_string = validator(*["from_date", "to_date"], pre=True, allow_reuse=True,)(
-        validate_str(is_date_string=True),
-    )
-
-    class Config:
-        extra = "ignore"
 
 
 class SensorDataContext(BaseModel):
@@ -159,6 +126,3 @@ class SensorDataContext(BaseModel):
     pressure_calibration_factor: float
     date: str
     location: Location
-
-    class Config:
-        extra = "ignore"
