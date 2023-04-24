@@ -7,7 +7,12 @@ class _TimeSeriesElement(BaseModel):
     to_date: str
 
     # validators
-    _val_date_string = validator("from_date", "to_date", pre=True, allow_reuse=True,)(
+    _val_date_string = validator(
+        "from_date",
+        "to_date",
+        pre=True,
+        allow_reuse=True,
+    )(
         validate_str(is_date_string=True),
     )
 
@@ -25,7 +30,11 @@ class SensorTypes:
         source: str
 
         # validators
-        _val_source = validator("source", pre=True, allow_reuse=True,)(
+        _val_source = validator(
+            "source",
+            pre=True,
+            allow_reuse=True,
+        )(
             validate_str(),
         )
 
@@ -118,6 +127,7 @@ class SensorMetadata(BaseModel):
 class CampaignMetadata(_TimeSeriesElement):
     campaign_id: str
     stations: list[CampaignTypes.Station]
+    additional_location_ids: list[str]
 
     # validators
     _val_campaign_id = validator("campaign_id", pre=True, allow_reuse=True)(

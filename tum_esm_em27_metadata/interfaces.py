@@ -158,6 +158,9 @@ def _test_data_integrity(
             ), f"unknown location id {s2.default_location_id}"
             assert s2.sensor_id in sensor_ids, f"unknown sensor id {s2.sensor_id}"
 
+        for lid in c1.additional_location_ids:
+            assert lid in location_ids, f"unknown location id {lid}"
+
     # integrity of time series in sensors.json
     for s3 in sensors:
         for location_timeseries in [
