@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from tum_esm_em27_metadata import types
-import pendulum
 
 
 class EM27MetadataInterface:
