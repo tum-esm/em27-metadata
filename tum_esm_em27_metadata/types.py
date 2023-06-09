@@ -18,124 +18,73 @@ class _TimeSeriesElement(BaseModel):
 
 
 class SensorTypes:
-    class DifferentUTCOffset(_TimeSeriesElement):
-        utc_offset: float
+    class DifferentUTCOffset(TimeSeriesElement):
+        utc_offset: float = pydantic.Field(..., gt=-12, lt=12)
 
-        # validators
-        _val_utc_offset = validator("utc_offset", pre=True, allow_reuse=True)(
-            validate_float(minimum=-12, maximum=12),
-        )
+    class DifferentPressureDataSource(TimeSeriesElement):
+        source: str = pydantic.Field(..., min_length=1)
 
-    class DifferentPressureDataSource(_TimeSeriesElement):
-        source: str
+    class DifferentPressureCalibrationFactor(TimeSeriesElement):
+        factor: float = pydantic.Field(..., ge=0.1, le=1.9)
 
-        # validators
-        _val_source = validator(
-            "source",
-            pre=True,
-            allow_reuse=True,
-        )(
-            validate_str(),
-        )
+    class DifferentOutputCalibrationFactor(TimeSeriesElement):
+        factor: float = pydantic.Field(..., ge=0.1, le=1.9)
 
-    class DifferentPressureCalibrationFactor(_TimeSeriesElement):
-        factor: float
-
-        # validators
-        _val_factor = validator("factor", pre=True, allow_reuse=True)(
-            validate_float(minimum=0.1, maximum=1.9),
-        )
-
-    class DifferentOutputCalibrationFactor(_TimeSeriesElement):
-        factor: float
-
-        # validators
-        _val_factor = validator("factor", pre=True, allow_reuse=True)(
-            validate_float(minimum=0.1, maximum=1.9),
-        )
-
-    class Location(_TimeSeriesElement):
+    class Location(TimeSeriesElement):
         location_id: str
-
-        # validators
-        _val_location_id = validator("location_id", pre=True, allow_reuse=True)(
-            validate_str(),
-        )
 
 
 class CampaignTypes:
-    class Station(BaseModel):
-        sensor_id: str
-        default_location_id: str
-        direction: str
-
-        # validators
-        _val_str = validator(
-            "sensor_id",
-            "default_location_id",
-            "direction",
-            pre=True,
-            allow_reuse=True,
-        )(
-            validate_str(),
-        )
+    class Station(pydantic.BaseModel):
+        sensor_id: str = pydantic.Field(..., min_length=1)
+        default_location_id: str = pydantic.Field(..., min_length=1)
+        direction: str = pydantic.Field(..., min_length=0)
 
 
-class LocationMetadata(BaseModel):
-    location_id: str
-    details: str
-    lon: float
-    lat: float
-    alt: float
-
-    # validators
-    _val_location_id = validator("location_id", pre=True, allow_reuse=True)(
-        validate_str(min_len=1, max_len=64, regex="^[A-Z0-9_]+$"),
+class LocationMetadata(pydantic.BaseModel):
+    location_id: str = pydantic.Field(
+        ...,
+        min_length=1,
+        max_length=128,
+        regex="^[a-zA-Z0-9_-]+$",
     )
-    _val_details = validator("details", pre=True, allow_reuse=True)(
-        validate_str(min_len=3),
-    )
-    _val_lon = validator("lon", pre=True, allow_reuse=True)(
-        validate_float(minimum=-180, maximum=180),
-    )
-    _val_lat = validator("lat", pre=True, allow_reuse=True)(
-        validate_float(minimum=-90, maximum=90),
-    )
-    _val_alt = validator("alt", pre=True, allow_reuse=True)(
-        validate_float(minimum=-20, maximum=10000),
-    )
+    details: str = pydantic.Field(..., min_length=1)
+    lon: float = pydantic.Field(..., ge=-180, le=180)
+    lat: float = pydantic.Field(..., ge=-90, le=90)
+    alt: float = pydantic.Field(..., ge=-20, le=10000)
 
 
-class SensorMetadata(BaseModel):
-    sensor_id: str
-    serial_number: int
+class SensorMetadata(pydantic.BaseModel):
+    sensor_id: str = (
+        pydantic.Field(
+            ...,
+            min_length=1,
+            max_length=128,
+            regex="^[a-zA-Z0-9_-]+$",
+        ),
+    )
+    serial_number: int = pydantic.Field(..., ge=1)
     different_utc_offsets: list[SensorTypes.DifferentUTCOffset]
     different_pressure_data_sources: list[SensorTypes.DifferentPressureDataSource]
     different_pressure_calibration_factors: list[SensorTypes.DifferentPressureCalibrationFactor]
     different_output_calibration_factors: list[SensorTypes.DifferentOutputCalibrationFactor]
     locations: list[SensorTypes.Location]
 
-    # validators
-    _val_sensor_id = validator("sensor_id", pre=True, allow_reuse=True)(
-        validate_str(min_len=1, max_len=64, regex="^[a-z0-9_]+$"),
-    )
-    _val_serial_number = validator("serial_number", pre=True, allow_reuse=True)(
-        validate_int(minimum=1),
-    )
 
-
-class CampaignMetadata(_TimeSeriesElement):
-    campaign_id: str
+class CampaignMetadata(TimeSeriesElement):
+    campaign_id: str = (
+        pydantic.Field(
+            ...,
+            min_length=1,
+            max_length=128,
+            regex="^[a-zA-Z0-9_-]+$",
+        ),
+    )
     stations: list[CampaignTypes.Station]
     additional_location_ids: list[str]
 
-    # validators
-    _val_campaign_id = validator("campaign_id", pre=True, allow_reuse=True)(
-        validate_str(min_len=1, max_len=64, regex="^[a-z0-9_]+$"),
-    )
 
-
-class SensorDataContext(BaseModel):
+class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
     serial_number: int
     utc_offset: float
