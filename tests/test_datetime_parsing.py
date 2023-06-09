@@ -1,6 +1,10 @@
+import pytest
 from tum_esm_em27_metadata.types import TimeSeriesElement
 
 
+@pytest.mark.ci
+@pytest.mark.action
+@pytest.mark.local
 def test_datetime_parsing() -> None:
     assert TimeSeriesElement.matches_datetime_regex("2016-10-01T00:00:00+00:00")
     assert TimeSeriesElement.matches_datetime_regex("2016-10-01T23:00:00+00:00")
@@ -8,6 +12,9 @@ def test_datetime_parsing() -> None:
     assert not TimeSeriesElement.matches_datetime_regex("2016-10-01T00:00:00+00:0")
 
 
+@pytest.mark.ci
+@pytest.mark.action
+@pytest.mark.local
 def test_time_series_element() -> None:
     tse1 = TimeSeriesElement(
         from_datetime="2016-10-01T00:00:00+00:00",

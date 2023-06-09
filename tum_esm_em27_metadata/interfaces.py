@@ -108,30 +108,45 @@ class EM27MetadataInterface:
         def fill_ts_data_gaps_with_default(ds: list[T], default_item: T) -> list[T]:
             out: list[T] = []
 
-            # if first element starts after requested time period
-            if ds[0].from_datetime > from_datetime:
-                new_first_element = default_item.copy()
-                new_first_element.from_datetime = from_datetime
-                new_first_element.to_datetime = ds[0].from_datetime
-                out.append(new_first_element)
+            if len(ds) == 0:
+                new_element = default_item.copy()
+                new_element.from_datetime = from_datetime
+                new_element.to_datetime = to_datetime
+                out.append(new_element)
+            else:
+                # if first element starts after requested time period
+                if ds[0].from_datetime > from_datetime:
+                    new_first_element = default_item.copy()
+                    new_first_element.from_datetime = from_datetime
+                    new_first_element.to_datetime = ds[0].from_datetime.subtract(seconds=1)  # type: ignore
+                    out.append(new_first_element)
 
-            # iterate over all elements and add default elements in between
-            # if there is a time gap between two elements
-            for i in range(len(ds) - 1):
-                out.append(ds[i])
-                if ds[i].to_datetime < ds[i + 1].from_datetime.subtract(seconds=1):  # type: ignore
-                    new_element = default_item.copy()
-                    new_element.from_datetime = ds[i].to_datetime.add(seconds=1)
-                    new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)  # type: ignore
-                    out.append(new_element)
-                out.append(ds[i + 1])
+                # iterate over all elements and add default elements in between
+                # if there is a time gap between two elements
+                for i in range(len(ds) - 1):
+                    out.append(ds[i])
+                    if ds[i].to_datetime < ds[i + 1].from_datetime.subtract(seconds=1):  # type: ignore
+                        new_element = default_item.copy()
+                        new_element.from_datetime = ds[i].to_datetime.add(seconds=1)
+                        new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)  # type: ignore
+                        out.append(new_element)
+                    out.append(ds[i + 1])
 
-            # if last element ends before requested time period
-            if ds[-1].to_datetime < to_datetime:
-                new_last_element = default_item.copy()
-                new_last_element.from_datetime = ds[-1].to_datetime.add(seconds=1)
-                new_last_element.to_datetime = to_datetime
-                out.append(new_last_element)
+                # append last element
+                out.append(ds[-1])
+
+                # if last element ends before requested time period
+                if ds[-1].to_datetime < to_datetime:
+                    new_last_element = default_item.copy()
+                    new_last_element.from_datetime = ds[-1].to_datetime.add(seconds=1)
+                    new_last_element.to_datetime = to_datetime
+                    out.append(new_last_element)
+
+            assert len(out) > 0, "This is a bug in the library"
+            for _e1, _e2 in zip(out[:-1], out[1:]):
+                assert (
+                    _e1.to_datetime.add(seconds=1) == _e2.from_datetime
+                ), "This is a bug in the library"
 
             return out
 
