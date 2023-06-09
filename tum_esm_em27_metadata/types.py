@@ -1,20 +1,24 @@
-from pydantic import BaseModel, validator
-from tum_esm_utils.validators import validate_float, validate_int, validate_str
+import re
+import pendulum
+import pydantic
 
 
-class _TimeSeriesElement(BaseModel):
-    from_date: str
-    to_date: str
+class TimeSeriesElement(pydantic.BaseModel):
+    from_datetime: pendulum.DateTime
+    to_datetime: pendulum.DateTime
 
-    # validators
-    _val_date_string = validator(
-        "from_date",
-        "to_date",
-        pre=True,
-        allow_reuse=True,
-    )(
-        validate_str(is_date_string=True),
-    )
+    @pydantic.validator("from_datetime", "to_datetime", pre=True)
+    def name_must_contain_space(cls, v: str):
+        assert isinstance(v, str), "must be a string"
+        assert TimeSeriesElement.matches_datetime_regex(
+            v
+        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
+        return pendulum.parser.parse(v, strict=True)
+
+    @staticmethod
+    def matches_datetime_regex(s: str) -> bool:
+        datetime_regex = r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$"
+        return re.match(datetime_regex, s) is not None
 
 
 class SensorTypes:
