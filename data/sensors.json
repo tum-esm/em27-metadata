@@ -27,7 +27,9 @@
             {
                 "from_datetime": "2020-08-26T00:00:00+00:00",
                 "to_datetime": "2020-10-01T23:59:59+00:00",
-                "factor": 0.9995
+                "factor_xco2": 1.001,
+                "factor_xch4": 1.002,
+                "factor_xco": 1.003
             }
         ],
         "locations": [

@@ -50,7 +50,9 @@ class EM27MetadataInterface:
             utc_offset: float
             pressure_data_source: str
             pressure_calibration_factor: float
-            output_calibration_factor: float
+            utput_calibration_factor_xco2: float
+            utput_calibration_factor_xch4: float
+            utput_calibration_factor_xco: float
             from_datetime: pendulum.DateTime
             to_datetime: pendulum.DateTime
             location: Location
@@ -88,7 +90,8 @@ class EM27MetadataInterface:
             types.SensorTypes.Location,
             types.SensorTypes.DifferentUTCOffset,
             types.SensorTypes.DifferentPressureDataSource,
-            types.SensorTypes.DifferentCalibrationFactor,
+            types.SensorTypes.DifferentPressureCalibrationFactor,
+            types.SensorTypes.DifferentOutputCalibrationFactor,
         )
 
         def parse_ts_data(ds: list[T]) -> list[T]:
@@ -180,14 +183,14 @@ class EM27MetadataInterface:
         # fill data gaps with default values
         pressure_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_pressure_calibration_factors),
-            types.SensorTypes.DifferentCalibrationFactor(**default_time_values, factor=1.0),
+            types.SensorTypes.DifferentPressureCalibrationFactor(**default_time_values, factor=1.0),
         )
 
         # get all output calibration factors matching the time period
         # fill data gaps with default values
         output_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_output_calibration_factors),
-            types.SensorTypes.DifferentCalibrationFactor(**default_time_values, factor=1.0),
+            types.SensorTypes.DifferentOutputCalibrationFactor(**default_time_values),
         )
 
         # now we can assume that we have continuous `utc_offsets`, `pressure_data_sources`,
@@ -250,7 +253,9 @@ class EM27MetadataInterface:
                                     utc_offset=uo.utc_offset,
                                     pressure_data_source=pds.source,
                                     pressure_calibration_factor=pcf.factor,
-                                    output_calibration_factor=ocf.factor,
+                                    output_calibration_factor_xco2=ocf.factor_xco2,
+                                    output_calibration_factor_xch4=ocf.factor_xch4,
+                                    output_calibration_factor_xco=ocf.factor_xco,
                                     from_datetime=t5_from,
                                     to_datetime=t5_to,
                                     location=location,

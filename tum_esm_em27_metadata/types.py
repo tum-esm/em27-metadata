@@ -31,9 +31,32 @@ class SensorTypes:
     class DifferentPressureDataSource(TimeSeriesElement):
         source: str = pydantic.Field(..., min_length=1)
 
-    class DifferentCalibrationFactor(TimeSeriesElement):
+    class DifferentPressureCalibrationFactor(TimeSeriesElement):
         factor: float = pydantic.Field(
             ...,
+            description=(
+                "Calibration factor that should be applied multiplicatively: "
+                + "expected true value = measured value * factor"
+            ),
+        )
+
+    class DifferentOutputCalibrationFactor(TimeSeriesElement):
+        factor_xco2: float = pydantic.Field(
+            1,
+            description=(
+                "Calibration factor that should be applied multiplicatively: "
+                + "expected true value = measured value * factor"
+            ),
+        )
+        factor_xch4: float = pydantic.Field(
+            1,
+            description=(
+                "Calibration factor that should be applied multiplicatively: "
+                + "expected true value = measured value * factor"
+            ),
+        )
+        factor_xco: float = pydantic.Field(
+            1,
             description=(
                 "Calibration factor that should be applied multiplicatively: "
                 + "expected true value = measured value * factor"
@@ -109,7 +132,7 @@ class SensorMetadata(pydantic.BaseModel):
         ),
     )
     different_pressure_calibration_factors: list[
-        SensorTypes.DifferentCalibrationFactor
+        SensorTypes.DifferentPressureCalibrationFactor
     ] = pydantic.Field(
         [],
         min_items=0,
@@ -119,9 +142,8 @@ class SensorMetadata(pydantic.BaseModel):
         ),
     )
 
-    # TODO: add different factors for "xco2", "xch4", etc.
     different_output_calibration_factors: list[
-        SensorTypes.DifferentCalibrationFactor
+        SensorTypes.DifferentOutputCalibrationFactor
     ] = pydantic.Field(
         [],
         min_items=0,
@@ -146,7 +168,9 @@ class SensorDataContext(pydantic.BaseModel):
     utc_offset: float
     pressure_data_source: str
     pressure_calibration_factor: float
-    output_calibration_factor: float
+    output_calibration_factor_xco2: float
+    output_calibration_factor_xch4: float
+    output_calibration_factor_xco: float
     from_datetime: pendulum.DateTime
     to_datetime: pendulum.DateTime
     location: LocationMetadata
