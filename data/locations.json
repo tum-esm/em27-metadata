@@ -4,13 +4,13 @@
         "details": "some loc 1 description",
         "lon": 10.5,
         "lat": 48.1,
-        "alt": 500
+        "alt": 500.0
     },
     {
         "location_id": "LOC2",
         "details": "some loc 2 description",
         "lon": 11.3,
         "lat": 48.0,
-        "alt": 600
+        "alt": 600.0
     }
 ]

@@ -1,8 +1,8 @@
 [
     {
         "campaign_id": "ci1",
-        "from_date": "20190913",
-        "to_date": "21000101",
+        "from_datetime": "2019-09-13T00:00:00+00:00",
+        "to_datetime": "2100-01-01T23:59:59+00:00",
         "stations": [
             {
                 "sensor_id": "sid1",

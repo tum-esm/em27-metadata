@@ -3,30 +3,42 @@
         "sensor_id": "sid1",
         "serial_number": 50,
         "different_utc_offsets": [
-            { "from_date": "20200826", "to_date": "20200926", "utc_offset": 2 }
+            {
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-09-26T23:59:59+00:00",
+                "utc_offset": 2
+            }
         ],
         "different_pressure_data_sources": [
             {
-                "from_date": "20200826",
-                "to_date": "20200830",
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-08-30T23:59:59+00:00",
                 "source": "LMU-MIM01-height-adjusted"
             }
         ],
         "different_pressure_calibration_factors": [
-            { "from_date": "20200826", "to_date": "20201001", "factor": 1.001 }
+            {
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-10-01T23:59:59+00:00",
+                "factor": 1.001
+            }
         ],
         "different_output_calibration_factors": [
-            { "from_date": "20200826", "to_date": "20201001", "factor": 0.9995 }
+            {
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-10-01T23:59:59+00:00",
+                "factor": 0.9995
+            }
         ],
         "locations": [
             {
-                "from_date": "20200826",
-                "to_date": "20200926",
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-09-26T23:59:59+00:00",
                 "location_id": "LOC1"
             },
             {
-                "from_date": "20200927",
-                "to_date": "20201001",
+                "from_datetime": "2020-09-27T00:00:00+00:00",
+                "to_datetime": "2020-10-01T23:59:59+00:00",
                 "location_id": "LOC2"
             }
         ]
@@ -40,8 +52,8 @@
         "different_output_calibration_factors": [],
         "locations": [
             {
-                "from_date": "20200826",
-                "to_date": "20201001",
+                "from_datetime": "2020-08-26T00:00:00+00:00",
+                "to_datetime": "2020-10-01T23:59:59+00:00",
                 "location_id": "LOC1"
             }
         ]
