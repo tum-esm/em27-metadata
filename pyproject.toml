@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tum_esm_em27_metadata"
-version = "2.0.0-rc.3"
+version = "2.0.0-rc.4"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 readme = "README.md"
 authors = [
@@ -40,9 +40,14 @@ implicit_reexport = true
 no_warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
+
+[[tool.mypy.overrides]]
+module = ["pendulum"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 markers = [
-    "ci: can be run in GitHub CI",
-    "action: can be run when using this repo as a GitHub Action",
-    "local: can be run locally"
+    "ci: run in GitHub CI",
+    "action: run when using this repo as a GitHub Action",
+    "local: run locally"
 ]

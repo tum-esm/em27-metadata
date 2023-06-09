@@ -102,7 +102,7 @@ class EM27MetadataInterface:
                     cropped_d.from_datetime = from_datetime
                 if cropped_d.to_datetime > to_datetime:
                     cropped_d.to_datetime = to_datetime
-                sensor_locations.append(cropped_d)
+                out.append(cropped_d)
             return out
 
         def fill_ts_data_gaps_with_default(ds: list[T], default_item: T) -> list[T]:
@@ -119,10 +119,10 @@ class EM27MetadataInterface:
             # if there is a time gap between two elements
             for i in range(len(ds) - 1):
                 out.append(ds[i])
-                if ds[i].to_datetime < ds[i + 1].from_datetime.subtract(seconds=1):
+                if ds[i].to_datetime < ds[i + 1].from_datetime.subtract(seconds=1):  # type: ignore
                     new_element = default_item.copy()
                     new_element.from_datetime = ds[i].to_datetime.add(seconds=1)
-                    new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)
+                    new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)  # type: ignore
                     out.append(new_element)
                 out.append(ds[i + 1])
 

@@ -1,6 +1,7 @@
 import os
 import json
 from os.path import dirname
+import pendulum
 
 import pytest
 from tum_esm_em27_metadata import interfaces, types
@@ -25,13 +26,16 @@ def test_data_integrity() -> None:
 
     example_sensor = location_data.sensors[0]
     example_sensor_location = example_sensor.locations[0]
-    example_sensor_data_context = location_data.get(
-        example_sensor.sensor_id, example_sensor_location.from_date
-    )
-    assert example_sensor_data_context.location.location_id == example_sensor_location.location_id
 
-    example_sensor_location = example_sensor.locations[0]
-    example_sensor_data_context = location_data.get(
-        example_sensor.sensor_id, example_sensor_location.from_date
+    date = example_sensor_location.from_datetime.to_rfc3339_string()[:10]  # type: ignore
+    from_datetime = pendulum.parse(f"{date}T00:00:00+00:00")
+    to_datetime = pendulum.parse(f"{date}T23:59:59+00:00")
+    assert isinstance(from_datetime, pendulum.DateTime)
+    assert isinstance(to_datetime, pendulum.DateTime)
+
+    example_sensor_data_contexts = location_data.get(
+        example_sensor.sensor_id, from_datetime, to_datetime
     )
-    assert example_sensor_data_context.location.location_id == example_sensor_location.location_id
+    assert len(example_sensor_data_contexts) >= 1
+    for sdc in example_sensor_data_contexts:
+        assert sdc.location.location_id == example_sensor_location.location_id

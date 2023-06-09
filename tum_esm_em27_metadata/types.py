@@ -1,4 +1,5 @@
 import re
+from typing import Any
 import pendulum
 import pydantic
 
@@ -8,12 +9,14 @@ class TimeSeriesElement(pydantic.BaseModel):
     to_datetime: pendulum.DateTime
 
     @pydantic.validator("from_datetime", "to_datetime", pre=True)
-    def name_must_contain_space(cls, v: str):
+    def name_must_contain_space(cls, v: str) -> pendulum.DateTime:
         assert isinstance(v, str), "must be a string"
         assert TimeSeriesElement.matches_datetime_regex(
             v
         ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
-        return pendulum.parser.parse(v, strict=True)
+        new_v: Any = pendulum.parser.parse(v, strict=True)
+        assert isinstance(new_v, pendulum.DateTime), "must be a datetime"
+        return new_v
 
     @staticmethod
     def matches_datetime_regex(s: str) -> bool:
@@ -33,7 +36,7 @@ class SensorTypes:
             ...,
             description=(
                 "Calibration factor that should be applied multiplicatively: "
-                + "expected true value = measured value * factor",
+                + "expected true value = measured value * factor"
             ),
         )
 
@@ -55,7 +58,7 @@ class CampaignTypes:
             description=(
                 "Direction of the station, e.g. 'north', 'upwind', etc. It "
                 + "is not used for any calculations but just listed in the "
-                + "merged output files of the retrieval pipeline.",
+                + "merged output files of the retrieval pipeline."
             ),
         )
 
@@ -94,7 +97,7 @@ class SensorMetadata(pydantic.BaseModel):
         min_items=0,
         description=(
             "List of UTC offsets in which the sensor has recorded "
-            + "data. Only required if the UTC offset is non zero.",
+            + "data. Only required if the UTC offset is non zero."
         ),
     )
     different_pressure_data_sources: list[SensorTypes.DifferentPressureDataSource] = pydantic.Field(
@@ -127,13 +130,11 @@ class SensorMetadata(pydantic.BaseModel):
 
 
 class CampaignMetadata(TimeSeriesElement):
-    campaign_id: str = (
-        pydantic.Field(
-            ...,
-            min_length=1,
-            max_length=128,
-            regex="^[a-zA-Z0-9_-]+$",
-        ),
+    campaign_id: str = pydantic.Field(
+        ...,
+        min_length=1,
+        max_length=128,
+        regex="^[a-zA-Z0-9_-]+$",
     )
     stations: list[CampaignTypes.Station]
     additional_location_ids: list[str]
@@ -146,5 +147,6 @@ class SensorDataContext(pydantic.BaseModel):
     pressure_data_source: str
     pressure_calibration_factor: float
     output_calibration_factor: float
-    date: str
+    from_datetime: pendulum.DateTime
+    to_datetime: pendulum.DateTime
     location: LocationMetadata
