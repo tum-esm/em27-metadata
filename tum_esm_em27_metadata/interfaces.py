@@ -1,3 +1,4 @@
+import pendulum
 from pydantic import BaseModel
 from tum_esm_em27_metadata import types
 
@@ -126,8 +127,8 @@ class EM27MetadataInterface:
 
 
 class _DatetimeSeriesItem(BaseModel):
-    from_date: str
-    to_date: str
+    from_datetime: pendulum.DateTime
+    from_datetime: pendulum.DateTime
 
 
 def _test_data_integrity(
@@ -171,11 +172,11 @@ def _test_data_integrity(
         ]:
             for l3 in location_timeseries:
                 assert (
-                    l3.from_date <= l3.to_date
-                ), f"from_datetime ({l3.from_date}) has to smaller than to_datetime ({l3.to_date})"
+                    l3.from_datetime <= l3.to_datetime
+                ), f"from_datetime ({l3.from_datetime}) has to less equal to_datetime ({l3.to_datetime})"
 
             for i in range(len(location_timeseries) - 1):
                 l1_, l2_ = location_timeseries[i : i + 2]
                 assert (
-                    l1_.to_date <= l2_.from_date
-                ), f"time periods are overlapping: {l1_.dict()}, {l1_.dict()}"
+                    l1_.to_datetime <= l2_.from_datetime
+                ), f"time periods are overlapping or not sorted: {l1_.dict()}, {l1_.dict()}"
