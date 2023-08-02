@@ -1,6 +1,6 @@
 from typing import Any, TypeVar
 import pendulum
-from pydantic import BaseModel
+import pydantic
 from tum_esm_em27_metadata import types
 
 T = TypeVar(
@@ -252,7 +252,9 @@ class EM27MetadataInterface:
         return sensor_data_contexts
 
 
-class _DatetimeSeriesItem(BaseModel):
+class _DatetimeSeriesItem(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+
     from_datetime: pendulum.DateTime
     to_datetime: pendulum.DateTime
 
@@ -279,7 +281,7 @@ def _test_data_integrity(
     # reference existence in campaigns.json
     for c1 in campaigns:
         for _sid in c1.sensor_ids:
-            assert _sid in location_ids, f"unknown location id {_sid}"
+            assert _sid in sensor_ids, f"unknown sensor id {_sid}"
         for _lid in c1.location_ids:
             assert _lid in location_ids, f"unknown location id {_lid}"
 

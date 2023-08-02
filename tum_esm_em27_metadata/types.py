@@ -5,10 +5,12 @@ import pydantic
 
 
 class TimeSeriesElement(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+
     from_datetime: pendulum.DateTime
     to_datetime: pendulum.DateTime
 
-    @pydantic.validator("from_datetime", "to_datetime", pre=True)
+    @pydantic.field_validator("from_datetime", "to_datetime", mode="before")
     def name_must_contain_space(cls, v: str) -> pendulum.DateTime:
         assert isinstance(v, str), "must be a string"
         assert TimeSeriesElement.matches_datetime_regex(
@@ -70,7 +72,7 @@ class LocationMetadata(pydantic.BaseModel):
         ...,
         min_length=1,
         max_length=128,
-        regex="^[a-zA-Z0-9_-]+$",
+        pattern="^[a-zA-Z0-9_-]+$",
         description="Your internal location ID identifying a specific location.",
     )
     details: str = pydantic.Field("", min_length=0)
@@ -84,7 +86,7 @@ class SensorMetadata(pydantic.BaseModel):
         ...,
         min_length=1,
         max_length=128,
-        regex="^[a-zA-Z0-9_-]+$",
+        pattern="^[a-zA-Z0-9_-]+$",
         description="Your internal sensor ID identifying a specific EM27/SUN (system).",
     )
     serial_number: int = pydantic.Field(
@@ -92,11 +94,11 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    locations: list[SensorTypes.Location] = pydantic.Field(..., min_items=0)
+    locations: list[SensorTypes.Location] = pydantic.Field(..., min_length=0)
 
     different_utc_offsets: list[SensorTypes.DifferentUTCOffset] = pydantic.Field(
         [],
-        min_items=0,
+        min_length=0,
         description=(
             "List of UTC offsets in which the sensor has recorded "
             + "data. Only required if the UTC offset is non zero."
@@ -104,7 +106,7 @@ class SensorMetadata(pydantic.BaseModel):
     )
     different_pressure_data_sources: list[SensorTypes.DifferentPressureDataSource] = pydantic.Field(
         [],
-        min_items=0,
+        min_length=0,
         description=(
             "List of pressure data sources. Only required if the data"
             + " source is the stations built-in pressure sensor."
@@ -114,7 +116,7 @@ class SensorMetadata(pydantic.BaseModel):
         SensorTypes.DifferentPressureCalibrationFactor
     ] = pydantic.Field(
         [],
-        min_items=0,
+        min_length=0,
         description=(
             "List of pressure calibration factors. Only required "
             + "if the pressure calibration factor is not 1.0."
@@ -125,7 +127,7 @@ class SensorMetadata(pydantic.BaseModel):
         SensorTypes.DifferentOutputCalibrationFactor
     ] = pydantic.Field(
         [],
-        min_items=0,
+        min_length=0,
         description="List of output calibration factors.",
     )
 
@@ -135,13 +137,15 @@ class CampaignMetadata(TimeSeriesElement):
         ...,
         min_length=1,
         max_length=128,
-        regex="^[a-zA-Z0-9_-]+$",
+        pattern="^[a-zA-Z0-9_-]+$",
     )
     sensor_ids: list[str]
     location_ids: list[str]
 
 
 class SensorDataContext(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+
     sensor_id: str
     serial_number: int
     from_datetime: pendulum.DateTime
