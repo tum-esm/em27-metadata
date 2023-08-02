@@ -1,11 +1,15 @@
-name: 'Test EM27 Metadata Storage'
-description: 'Test the integrity of a repository containing EM27 metadata'
+name: "Test EM27 Metadata Storage"
+description: "Test the integrity of a repository containing EM27 metadata"
 runs:
-    using: 'composite'
+    using: "composite"
     steps:
         # check-out repo and set-up python
         - name: Check out repository
           uses: actions/checkout@v3
+        - name: Set up Python 3.9.16
+          uses: actions/setup-python@v4
+          with:
+              python-version: 3.9.16
 
         # move all library files into working directory; this makes
         # testing easier whebecausen we don't have to worry about
@@ -20,7 +24,7 @@ runs:
               cp ${{ github.action_path }}/README.md .
           shell: bash
 
-        # load cached venv if cache exists
+        # try to load cached venv
         - name: Load cached venv
           id: cached-poetry-dependencies
           uses: actions/cache@v3
@@ -28,13 +32,7 @@ runs:
               path: .venv
               key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('poetry.lock') }}
 
-        - name: Set up Python 3.9.16
-          if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-          uses: actions/setup-python@v3
-          with:
-              python-version: 3.9.16
-
-        # install & configure poetry
+        # install & configure poetry if cache does not exist
         - name: Install Poetry
           if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
           uses: snok/install-poetry@v1
