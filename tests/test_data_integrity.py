@@ -2,7 +2,6 @@ import os
 import json
 from os.path import dirname
 import pendulum
-
 import pytest
 from tum_esm_em27_metadata import interfaces, types
 
@@ -155,18 +154,31 @@ def test_getter_function() -> None:
     for c1, c2 in zip(chunks[:-1], chunks[1:]):
         assert c1.to_datetime == c2.from_datetime.add(seconds=-1)
 
-    # check correct timewise splitting
-    assert chunks[0].from_datetime == pendulum.parse("2020-02-01T01:00:00+00:00")
-    assert chunks[1].from_datetime == pendulum.parse("2020-02-01T02:00:00+00:00")
-    assert chunks[2].from_datetime == pendulum.parse("2020-02-01T12:00:00+00:00")
-    assert chunks[3].from_datetime == pendulum.parse("2020-02-01T13:00:00+00:00")
-    assert chunks[4].from_datetime == pendulum.parse("2020-02-01T14:00:00+00:00")
-    assert chunks[5].from_datetime == pendulum.parse("2020-02-01T15:00:00+00:00")
-    assert chunks[6].from_datetime == pendulum.parse("2020-02-01T16:00:00+00:00")
-    assert chunks[7].from_datetime == pendulum.parse("2020-02-01T22:00:00+00:00")
+    # check correct splitting
 
-    # TODO: check values of utc offsets
-    # TODO: check values of pressure data sources
-    # TODO: check values of pressure calibration factors
-    # TODO: check values of output calibration factors
-    # TODO: check values of locations
+    from_datetimes = [c.from_datetime for c in chunks]
+    assert from_datetimes == [
+        pendulum.parse("2020-02-01T01:00:00+00:00"),
+        pendulum.parse("2020-02-01T02:00:00+00:00"),
+        pendulum.parse("2020-02-01T12:00:00+00:00"),
+        pendulum.parse("2020-02-01T13:00:00+00:00"),
+        pendulum.parse("2020-02-01T14:00:00+00:00"),
+        pendulum.parse("2020-02-01T15:00:00+00:00"),
+        pendulum.parse("2020-02-01T16:00:00+00:00"),
+        pendulum.parse("2020-02-01T22:00:00+00:00"),
+    ]
+
+    utc_offsets = [c.utc_offset for c in chunks]
+    assert utc_offsets == [0, 1, 1, 1, 1, 1, 2, 0]
+
+    pressure_data_sources = [c.pressure_data_source for c in chunks]
+    assert pressure_data_sources == ["sid1", "src1", "src1", "src1", "src1", "src2", "src2", "sid1"]
+
+    pressure_calibration_factors = [c.pressure_calibration_factor for c in chunks]
+    assert pressure_calibration_factors == [1.0, 1.001, 1.001, 1.001, 1.002, 1.002, 1.002, 1.0]
+
+    output_calibration_factors = [c.output_calibration_factors_xco2[0] for c in chunks]
+    assert output_calibration_factors == [1, 1.001, 1.001, 1.004, 1.004, 1.004, 1.004, 1]
+
+    location_ids = [c.location.location_id for c in chunks]
+    assert location_ids == ["lid1", "lid1", "lid2", "lid2", "lid2", "lid2", "lid2", "lid2"]

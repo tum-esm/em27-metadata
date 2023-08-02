@@ -111,7 +111,6 @@ class EM27MetadataInterface:
                         new_element.from_datetime = ds[i].to_datetime.add(seconds=1)
                         new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)  # type: ignore
                         out.append(new_element)
-                    out.append(ds[i + 1])
 
                 # append last element
                 out.append(ds[-1])
