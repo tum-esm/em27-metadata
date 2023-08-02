@@ -150,8 +150,8 @@ class SensorDataContext(pydantic.BaseModel):
     serial_number: int
     from_datetime: pendulum.DateTime
     to_datetime: pendulum.DateTime
-    location: LocationMetadata
 
+    location: LocationMetadata
     utc_offset: float
     pressure_data_source: str
     pressure_calibration_factor: float

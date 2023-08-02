@@ -126,7 +126,7 @@ def test_getter_function() -> None:
                 "locations": [
                     {
                         "from_datetime": "2020-02-01T01:00:00+00:00",
-                        "to_datetime": "2020-02-01T11:59:59+00:00",
+                        "to_datetime": "2020-02-01T09:59:59+00:00",
                         "location_id": "lid1",
                     },
                     {
@@ -150,10 +150,6 @@ def test_getter_function() -> None:
 
     assert len(chunks) == 8
 
-    # check that the chunks are sorted and consecutive
-    for c1, c2 in zip(chunks[:-1], chunks[1:]):
-        assert c1.to_datetime == c2.from_datetime.add(seconds=-1)
-
     # check correct splitting
 
     from_datetimes = [c.from_datetime for c in chunks]
@@ -166,6 +162,17 @@ def test_getter_function() -> None:
         pendulum.parse("2020-02-01T15:00:00+00:00"),
         pendulum.parse("2020-02-01T16:00:00+00:00"),
         pendulum.parse("2020-02-01T22:00:00+00:00"),
+    ]
+    to_datetimes = [c.to_datetime for c in chunks]
+    assert to_datetimes == [
+        pendulum.parse("2020-02-01T01:59:59+00:00"),
+        pendulum.parse("2020-02-01T09:59:59+00:00"),
+        pendulum.parse("2020-02-01T12:59:59+00:00"),
+        pendulum.parse("2020-02-01T13:59:59+00:00"),
+        pendulum.parse("2020-02-01T14:59:59+00:00"),
+        pendulum.parse("2020-02-01T15:59:59+00:00"),
+        pendulum.parse("2020-02-01T21:59:59+00:00"),
+        pendulum.parse("2020-02-01T22:59:59+00:00"),
     ]
 
     utc_offsets = [c.utc_offset for c in chunks]
