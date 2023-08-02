@@ -1,20 +1,9 @@
 [
     {
-        "campaign_id": "ci1",
-        "from_datetime": "2019-09-13T00:00:00+00:00",
-        "to_datetime": "2100-01-01T23:59:59+00:00",
-        "stations": [
-            {
-                "sensor_id": "sid1",
-                "default_location_id": "LOC1",
-                "direction": "north"
-            },
-            {
-                "sensor_id": "sid2",
-                "default_location_id": "LOC2",
-                "direction": "south"
-            }
-        ],
-        "additional_location_ids": []
+        "campaign_id": "cid1",
+        "from_date": "2019-09-13T00:00:00+00:00",
+        "to_date": "2100-01-01T23:59:59+00:00",
+        "sensor_ids": ["sid1", "sid2"],
+        "location_ids": ["lid1", "lid2"]
     }
 ]

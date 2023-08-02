@@ -291,14 +291,10 @@ def _test_data_integrity(
 
     # reference existence in campaigns.json
     for c1 in campaigns:
-        for s2 in c1.stations:
-            assert (
-                s2.default_location_id in location_ids
-            ), f"unknown location id {s2.default_location_id}"
-            assert s2.sensor_id in sensor_ids, f"unknown sensor id {s2.sensor_id}"
-
-        for lid in c1.additional_location_ids:
-            assert lid in location_ids, f"unknown location id {lid}"
+        for _sid in c1.sensor_ids:
+            assert _sid in location_ids, f"unknown location id {_sid}"
+        for _lid in c1.location_ids:
+            assert _lid in location_ids, f"unknown location id {_lid}"
 
     # integrity of time series in sensors.json
     for s3 in sensors:

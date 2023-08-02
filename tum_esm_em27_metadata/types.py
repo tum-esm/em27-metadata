@@ -158,8 +158,8 @@ class CampaignMetadata(TimeSeriesElement):
         max_length=128,
         regex="^[a-zA-Z0-9_-]+$",
     )
-    stations: list[CampaignTypes.Station]
-    additional_location_ids: list[str]
+    sensor_ids: list[str]
+    location_ids: list[str]
 
 
 class SensorDataContext(pydantic.BaseModel):
