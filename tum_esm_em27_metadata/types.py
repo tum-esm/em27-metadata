@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Optional
 import pendulum
 import pydantic
 
@@ -41,25 +41,19 @@ class SensorTypes:
         )
 
     class DifferentOutputCalibrationFactor(TimeSeriesElement):
-        factor_xco2: float = pydantic.Field(
-            1,
+        """These can be either single values to be applied by
+        multiplication/division or a list of values for example
+        for one airmass-independent and one airmass-dependent
+        factor (see Ohyama 2021)."""
+
+        factors_xco2: list[float] = pydantic.Field([1], description="Calibration factors for XCO2.")
+        factors_xch4: list[float] = pydantic.Field([1], description="Calibration factors for XCH4.")
+        factors_xco: list[float] = pydantic.Field([1], description="Calibration factors for XCO.")
+        calibration_scheme: Optional[str] = pydantic.Field(
+            None,
             description=(
-                "Calibration factor that should be applied multiplicatively: "
-                + "expected true value = measured value * factor"
-            ),
-        )
-        factor_xch4: float = pydantic.Field(
-            1,
-            description=(
-                "Calibration factor that should be applied multiplicatively: "
-                + "expected true value = measured value * factor"
-            ),
-        )
-        factor_xco: float = pydantic.Field(
-            1,
-            description=(
-                "Calibration factor that should be applied multiplicatively: "
-                + "expected true value = measured value * factor"
+                'Used calibration scheme - for example "Ohyama 2021".'
+                + " This can be an arbitrary string or `null`."
             ),
         )
 
@@ -68,21 +62,6 @@ class SensorTypes:
             ...,
             min_length=1,
             description="Location ID referring to a location named in `locations.json`",
-        )
-
-
-class CampaignTypes:
-    class Station(pydantic.BaseModel):
-        sensor_id: str = pydantic.Field(..., min_length=1)
-        default_location_id: str = pydantic.Field(..., min_length=1)
-        direction: str = pydantic.Field(
-            ...,
-            min_length=0,
-            description=(
-                "Direction of the station, e.g. 'north', 'upwind', etc. It "
-                + "is not used for any calculations but just listed in the "
-                + "merged output files of the retrieval pipeline."
-            ),
         )
 
 

@@ -27,9 +27,10 @@
             {
                 "from_datetime": "2020-08-26T00:00:00+00:00",
                 "to_datetime": "2020-10-01T23:59:59+00:00",
-                "factor_xco2": 1.001,
-                "factor_xch4": 1.002,
-                "factor_xco": 1.003
+                "factors_xco2": [1.001, 0],
+                "factors_xch4": [1.002, 0],
+                "factors_xco": [1.003, 0],
+                "calibration_scheme": "Ohyama2021"
             }
         ],
         "locations": [
