@@ -26,14 +26,14 @@ class TimeSeriesElement(pydantic.BaseModel):
 
 class SensorTypes:
     class DifferentUTCOffset(TimeSeriesElement):
-        utc_offset: float = pydantic.Field(..., gt=-12, lt=12)
+        utc_offset: float = pydantic.Field(0, gt=-12, lt=12)
 
     class DifferentPressureDataSource(TimeSeriesElement):
         source: str = pydantic.Field(..., min_length=1)
 
     class DifferentPressureCalibrationFactor(TimeSeriesElement):
         factor: float = pydantic.Field(
-            ...,
+            1,
             description=(
                 "Calibration factor that should be applied multiplicatively: "
                 + "expected true value = measured value * factor"
@@ -144,12 +144,15 @@ class CampaignMetadata(TimeSeriesElement):
 class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
     serial_number: int
-    utc_offset: float
-    pressure_data_source: str
-    pressure_calibration_factor: float
-    output_calibration_factor_xco2: float
-    output_calibration_factor_xch4: float
-    output_calibration_factor_xco: float
     from_datetime: pendulum.DateTime
     to_datetime: pendulum.DateTime
     location: LocationMetadata
+
+    utc_offset: float
+    pressure_data_source: str
+    pressure_calibration_factor: float
+
+    output_calibration_factors_xco2: list[float]
+    output_calibration_factors_xch4: list[float]
+    output_calibration_factors_xco: list[float]
+    output_calibration_scheme: Optional[str]
