@@ -29,6 +29,7 @@ pip install tum-esm-em27-metadata
 ```
 
 ```python
+import pendulum
 import tum_esm_em27_metadata
 
 em27_metadata = tum_esm_em27_metadata.load_from_github(
@@ -44,36 +45,49 @@ em27_metadata = tum_esm_em27_metadata.load_from_local_files(
 )
 
 metadata = em27_metadata.get(
-    sensor_id = "ma", date = "20220601"
+    sensor_id = "ma",
+    from_datetime = pendulum.DateTime(
+        year=2022, month=6, day=1, hour=0, minute=0, second=0
+    ),
+    to_datetime = pendulum.DateTime(
+        year=2022, month=6, day=1, hour=23, minute=59, second=59
+    ),
 )
 
-print(metadata.dict())
+print(metadata)
+
 ```
 
 Prints out:
 
 ```json
-{
-    "sensor_id": "ma",
-    "serial_number": 61,
-    "utc_offset": 0,
-    "pressure_data_source": "ma",
-    "pressure_calibration_factor": 1,
-    "output_calibration_factor": 1,
-    "date": "20220601",
-    "location": {
-        "location_id": "TUM_I",
-        "details": "TUM Dach Innenstadt",
-        "lon": 11.569,
-        "lat": 48.151,
-        "alt": 539
+[
+    {
+        "sensor_id": "ma",
+        "serial_number": 61,
+        "from_datetime": "2022-06-01T00:00:00+00:00",
+        "to_datetime": "2022-06-01T23:59:59+00:00",
+        "location": {
+            "location_id": "TUM_I",
+            "details": "TUM Dach Innenstadt",
+            "lon": 11.569,
+            "lat": 48.151,
+            "alt": 539
+        },
+        "utc_offset": 0,
+        "pressure_data_source": "ma",
+        "pressure_calibration_factor": 1,
+        "output_calibration_factors_xco2": 1,
+        "output_calibration_factors_xch4": 1,
+        "output_calibration_factors_xco": 1,
+        "output_calibration_scheme": null
     }
-}
+]
 ```
 
-The object returned by `em27_metadata.get()` is of type `tum_esm_em27_metadata.types.SensorDataContext`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.dict()`.
+The object returned by `em27_metadata.get()` is of type `lis[tum_esm_em27_metadata.types.SensorDataContext]`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.model_dump()`.
 
-You can find dummy data in the `data/` folder.
+The list will contain one item per time period where the metadata properties are continuous (same location, etc.). You can find dummy data in the `data/` folder.
 
 <br/>
 
@@ -105,5 +119,8 @@ poetry build
 poetry publish
 ```
 
-`2016-10-01T00:00:00+00:00`
-`2016-10-01T23:59:59+00:00`
+In order to test the "get metadata for time period" function, the following example is used:
+
+![](./data/example.png)
+
+The test `tests/test_data_integrity.py` requests the time period `00:00` to `23:59`. The utc offsets are specified (to be non-zero) from `02:00` to `15:59` where is has one non zero value and from `16:00` to `21:59` where it has another non zero value. Each properties has two (non-default) values over the day. There should be 8 resulting chunks of metadata. All properties of each chunk are validated in the test.
