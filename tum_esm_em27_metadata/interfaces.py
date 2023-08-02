@@ -241,7 +241,7 @@ class EM27MetadataInterface:
                     location=location,
                     utc_offset=uo.utc_offset,
                     pressure_data_source=pds.source,
-                    pressure_calibration_factor=pcf.calibration_factor,
+                    pressure_calibration_factor=pcf.factor,
                     output_calibration_factors_xco2=ocf.factors_xco2,
                     output_calibration_factors_xch4=ocf.factors_xch4,
                     output_calibration_factors_xco=ocf.factors_xco,

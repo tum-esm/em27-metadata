@@ -39,3 +39,13 @@ def test_data_integrity() -> None:
     assert len(example_sensor_data_contexts) >= 1
     for sdc in example_sensor_data_contexts:
         assert sdc.location.location_id == example_sensor_location.location_id
+
+
+# TODO: add a proper test for the getter function
+
+
+@pytest.mark.ci
+@pytest.mark.action
+@pytest.mark.local
+def test_getter_function() -> None:
+    pass
