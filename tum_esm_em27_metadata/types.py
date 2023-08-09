@@ -1,7 +1,6 @@
 import datetime
 import re
-from typing import Any, Optional
-import pendulum
+from typing import Optional
 import pydantic
 
 
@@ -23,14 +22,6 @@ class TimeSeriesElement(pydantic.BaseModel):
     def matches_datetime_regex(s: str) -> bool:
         datetime_regex = r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$"
         return re.match(datetime_regex, s) is not None
-
-    @property
-    def from_date(self) -> datetime.date:
-        return self.from_datetime.date()
-
-    @property
-    def to_date(self) -> datetime.date:
-        return self.to_datetime.date()
 
 
 class SensorTypes:
@@ -167,11 +158,3 @@ class SensorDataContext(pydantic.BaseModel):
     output_calibration_factors_xch4: list[float]
     output_calibration_factors_xco: list[float]
     output_calibration_scheme: Optional[str]
-
-    @property
-    def from_date(self) -> datetime.date:
-        return self.from_datetime.date()
-
-    @property
-    def to_date(self) -> datetime.date:
-        return self.to_datetime.date()
