@@ -1,7 +1,7 @@
+import datetime
 import os
 import json
 from os.path import dirname
-import pendulum
 import pytest
 from tum_esm_em27_metadata import interfaces, types
 
@@ -26,11 +26,9 @@ def test_data_integrity() -> None:
     example_sensor = location_data.sensors[0]
     example_sensor_location = example_sensor.locations[0]
 
-    date = example_sensor_location.from_datetime.to_rfc3339_string()[:10]  # type: ignore
-    from_datetime = pendulum.parse(f"{date}T00:00:00+00:00")
-    to_datetime = pendulum.parse(f"{date}T23:59:59+00:00")
-    assert isinstance(from_datetime, pendulum.DateTime)
-    assert isinstance(to_datetime, pendulum.DateTime)
+    date_string = example_sensor_location.from_datetime.strftime("%Y-%m-%d")
+    from_datetime = datetime.datetime.fromisoformat(f"{date_string}T00:00:00+00:00")
+    to_datetime = datetime.datetime.fromisoformat(f"{date_string}T23:59:59+00:00")
 
     example_sensor_data_contexts = location_data.get(
         example_sensor.sensor_id, from_datetime, to_datetime
@@ -141,10 +139,8 @@ def test_getter_function() -> None:
 
     location_data = interfaces.EM27MetadataInterface(locations, sensors, campaigns=[])
 
-    from_datetime = pendulum.parse("2020-02-01T00:00:00+00:00")
-    to_datetime = pendulum.parse("2020-02-01T23:59:59+00:00")
-    assert isinstance(from_datetime, pendulum.DateTime), "must be a datetime"
-    assert isinstance(to_datetime, pendulum.DateTime), "must be a datetime"
+    from_datetime = datetime.datetime.fromisoformat("2020-02-01T00:00:00+00:00")
+    to_datetime = datetime.datetime.fromisoformat("2020-02-01T23:59:59+00:00")
 
     chunks = location_data.get("sid1", from_datetime, to_datetime)
 
@@ -154,25 +150,25 @@ def test_getter_function() -> None:
 
     from_datetimes = [c.from_datetime for c in chunks]
     assert from_datetimes == [
-        pendulum.parse("2020-02-01T01:00:00+00:00"),
-        pendulum.parse("2020-02-01T02:00:00+00:00"),
-        pendulum.parse("2020-02-01T12:00:00+00:00"),
-        pendulum.parse("2020-02-01T13:00:00+00:00"),
-        pendulum.parse("2020-02-01T14:00:00+00:00"),
-        pendulum.parse("2020-02-01T15:00:00+00:00"),
-        pendulum.parse("2020-02-01T16:00:00+00:00"),
-        pendulum.parse("2020-02-01T22:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T01:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T02:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T12:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T13:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T14:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T15:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T16:00:00+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T22:00:00+00:00"),
     ]
     to_datetimes = [c.to_datetime for c in chunks]
     assert to_datetimes == [
-        pendulum.parse("2020-02-01T01:59:59+00:00"),
-        pendulum.parse("2020-02-01T09:59:59+00:00"),
-        pendulum.parse("2020-02-01T12:59:59+00:00"),
-        pendulum.parse("2020-02-01T13:59:59+00:00"),
-        pendulum.parse("2020-02-01T14:59:59+00:00"),
-        pendulum.parse("2020-02-01T15:59:59+00:00"),
-        pendulum.parse("2020-02-01T21:59:59+00:00"),
-        pendulum.parse("2020-02-01T22:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T01:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T09:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T12:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T13:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T14:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T15:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T21:59:59+00:00"),
+        datetime.datetime.fromisoformat("2020-02-01T22:59:59+00:00"),
     ]
 
     utc_offsets = [c.utc_offset for c in chunks]

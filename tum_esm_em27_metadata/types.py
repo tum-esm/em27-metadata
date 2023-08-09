@@ -1,3 +1,4 @@
+import datetime
 import re
 from typing import Any, Optional
 import pendulum
@@ -7,23 +8,29 @@ import pydantic
 class TimeSeriesElement(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
-    from_datetime: pendulum.DateTime
-    to_datetime: pendulum.DateTime
+    from_datetime: datetime.datetime
+    to_datetime: datetime.datetime
 
     @pydantic.field_validator("from_datetime", "to_datetime", mode="before")
-    def name_must_contain_space(cls, v: str) -> pendulum.DateTime:
+    def name_must_contain_space(cls, v: str) -> datetime.datetime:
         assert isinstance(v, str), "must be a string"
         assert TimeSeriesElement.matches_datetime_regex(
             v
         ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
-        new_v: Any = pendulum.parser.parse(v, strict=True)
-        assert isinstance(new_v, pendulum.DateTime), "must be a datetime"
-        return new_v
+        return datetime.datetime.fromisoformat(v)
 
     @staticmethod
     def matches_datetime_regex(s: str) -> bool:
         datetime_regex = r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$"
         return re.match(datetime_regex, s) is not None
+
+    @property
+    def from_date(self) -> datetime.date:
+        return self.from_datetime.date()
+
+    @property
+    def to_date(self) -> datetime.date:
+        return self.to_datetime.date()
 
 
 class SensorTypes:
@@ -148,8 +155,8 @@ class SensorDataContext(pydantic.BaseModel):
 
     sensor_id: str
     serial_number: int
-    from_datetime: pendulum.DateTime
-    to_datetime: pendulum.DateTime
+    from_datetime: datetime.datetime
+    to_datetime: datetime.datetime
 
     location: LocationMetadata
     utc_offset: float
@@ -160,3 +167,11 @@ class SensorDataContext(pydantic.BaseModel):
     output_calibration_factors_xch4: list[float]
     output_calibration_factors_xco: list[float]
     output_calibration_scheme: Optional[str]
+
+    @property
+    def from_date(self) -> datetime.date:
+        return self.from_datetime.date()
+
+    @property
+    def to_date(self) -> datetime.date:
+        return self.to_datetime.date()

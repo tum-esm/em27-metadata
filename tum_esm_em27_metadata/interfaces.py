@@ -1,5 +1,5 @@
+import datetime
 from typing import Any, TypeVar
-import pendulum
 import pydantic
 from tum_esm_em27_metadata import types
 
@@ -33,8 +33,8 @@ class EM27MetadataInterface:
     def get(
         self,
         sensor_id: str,
-        from_datetime: pendulum.DateTime,
-        to_datetime: pendulum.DateTime,
+        from_datetime: datetime.datetime,
+        to_datetime: datetime.datetime,
     ) -> list[types.SensorDataContext]:
         """For a given `sensor_id` and `date`, return the metadata. The
         returned list contains all locations at which the sensor has been
@@ -99,17 +99,23 @@ class EM27MetadataInterface:
                 if ds[0].from_datetime > from_datetime:
                     new_first_element = default_item.model_copy()
                     new_first_element.from_datetime = from_datetime
-                    new_first_element.to_datetime = ds[0].from_datetime.subtract(seconds=1)  # type: ignore
+                    new_first_element.to_datetime = ds[0].from_datetime - datetime.timedelta(
+                        seconds=1
+                    )
                     out.append(new_first_element)
 
                 # iterate over all elements and add default elements in between
                 # if there is a time gap between two elements
                 for i in range(len(ds) - 1):
                     out.append(ds[i])
-                    if ds[i].to_datetime < ds[i + 1].from_datetime.subtract(seconds=1):  # type: ignore
+                    if ds[i].to_datetime < ds[i + 1].from_datetime - datetime.timedelta(seconds=1):
                         new_element = default_item.model_copy()
-                        new_element.from_datetime = ds[i].to_datetime.add(seconds=1)
-                        new_element.to_datetime = ds[i + 1].from_datetime.subtract(seconds=1)  # type: ignore
+                        new_element.from_datetime = ds[i].to_datetime + datetime.timedelta(
+                            seconds=1
+                        )
+                        new_element.to_datetime = ds[i + 1].from_datetime - datetime.timedelta(
+                            seconds=1
+                        )
                         out.append(new_element)
 
                 # append last element
@@ -118,15 +124,17 @@ class EM27MetadataInterface:
                 # if last element ends before requested time period
                 if ds[-1].to_datetime < to_datetime:
                     new_last_element = default_item.model_copy()
-                    new_last_element.from_datetime = ds[-1].to_datetime.add(seconds=1)
+                    new_last_element.from_datetime = ds[-1].to_datetime + datetime.timedelta(
+                        seconds=1
+                    )
                     new_last_element.to_datetime = to_datetime
                     out.append(new_last_element)
 
             assert len(out) > 0, "This is a bug in the library"
             for _e1, _e2 in zip(out[:-1], out[1:]):
                 assert (
-                    _e1.to_datetime.add(seconds=1) == _e2.from_datetime
-                ), "This is a bug in the library"
+                    _e1.to_datetime + datetime.timedelta(seconds=1)
+                ) == _e2.from_datetime, "This is a bug in the library"
 
             return out
 
@@ -181,7 +189,7 @@ class EM27MetadataInterface:
         # we split the context into to. The we do this joining/splitting for the other time
         # series properties as well.
 
-        breakpoints: list[pendulum.DateTime] = list(
+        breakpoints: list[datetime.datetime] = list(
             sorted(
                 set(
                     [
@@ -254,8 +262,8 @@ class EM27MetadataInterface:
 class _DatetimeSeriesItem(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
-    from_datetime: pendulum.DateTime
-    to_datetime: pendulum.DateTime
+    from_datetime: datetime.datetime
+    to_datetime: datetime.datetime
 
 
 def _test_data_integrity(

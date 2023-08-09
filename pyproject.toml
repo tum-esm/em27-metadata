@@ -16,7 +16,6 @@ repository = "https://github.com/tum-esm/em27-metadata"
 [tool.poetry.dependencies]
 python = "^3.9"
 tum-esm-utils = "^1.4.0"
-pendulum = "^2.1.2"
 pydantic = "^2.1.1"
 
 [tool.poetry.group.dev]
