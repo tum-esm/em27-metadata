@@ -253,8 +253,13 @@ class EM27MetadataInterface:
                     output_calibration_factors_xch4=ocf.factors_xch4,
                     output_calibration_factors_xco=ocf.factors_xco,
                     output_calibration_scheme=ocf.calibration_scheme,
+                    multiple_ctx_on_this_date=False,
                 )
             )
+
+        if len(sensor_data_contexts) > 1:
+            for ctx in sensor_data_contexts:
+                ctx.multiple_ctx_on_this_date = True
 
         return sensor_data_contexts
 

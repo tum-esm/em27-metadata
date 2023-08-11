@@ -158,3 +158,5 @@ class SensorDataContext(pydantic.BaseModel):
     output_calibration_factors_xch4: list[float]
     output_calibration_factors_xco: list[float]
     output_calibration_scheme: Optional[str]
+
+    multiple_ctx_on_this_date: bool
