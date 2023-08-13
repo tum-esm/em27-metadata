@@ -70,11 +70,10 @@ class LocationMetadata(pydantic.BaseModel):
         ...,
         min_length=1,
         max_length=128,
-        pattern="^(?!_)(?!.*__)[a-zA-Z0-9_-]+(?<!_)$",
+        pattern=r"^[a-zA-Z0-9_-]+$",
         description=(
             "Your internal location ID identifying a specific location. "
-            + "Allowed values: letters, numbers, dashes, underscores; but "
-            + "no double, leading, or trailing underscores."
+            + "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
     details: str = pydantic.Field("", min_length=0)
@@ -88,11 +87,10 @@ class SensorMetadata(pydantic.BaseModel):
         ...,
         min_length=1,
         max_length=128,
-        pattern="^(?!_)(?!.*__)[a-zA-Z0-9_-]+(?<!_)$",
+        pattern=r"^[a-zA-Z0-9_-]+$",
         description=(
             "Your internal sensor ID identifying a specific EM27/SUN (system). "
-            + "Allowed values: letters, numbers, dashes, underscores; but "
-            + "no double, leading, or trailing underscores."
+            + "Allowed characters: letters, numbers, dashes, underscores."
         ),
     )
     serial_number: int = pydantic.Field(
@@ -143,11 +141,10 @@ class CampaignMetadata(TimeSeriesElement):
         ...,
         min_length=1,
         max_length=128,
-        pattern="^(?!_)(?!.*__)[a-zA-Z0-9_-]+(?<!_)$",
+        pattern=r"^[a-zA-Z0-9_-]+$",
         description=(
             "Your internal sensor ID identifying a specific campaign. "
-            + "Allowed values: letters, numbers, dashes, underscores; but "
-            + "no double, leading, or trailing underscores."
+            + "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
     sensor_ids: list[str]
