@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Optional
+from typing import Any, Optional
 import pydantic
 
 
@@ -22,6 +22,10 @@ class TimeSeriesElement(pydantic.BaseModel):
     def matches_datetime_regex(s: str) -> bool:
         datetime_regex = r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$"
         return re.match(datetime_regex, s) is not None
+
+    @pydantic.field_serializer("from_datetime", "to_datetime")
+    def t_serializer(self, dt: datetime.date, _info: Any) -> str:
+        return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 
 class SensorTypes:
@@ -170,3 +174,7 @@ class SensorDataContext(pydantic.BaseModel):
     output_calibration_scheme: Optional[str]
 
     multiple_ctx_on_this_date: bool
+
+    @pydantic.field_serializer("from_datetime", "to_datetime")
+    def t_serializer(self, dt: datetime.date, _info: Any) -> str:
+        return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
