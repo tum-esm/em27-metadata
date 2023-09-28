@@ -17,8 +17,35 @@ class EM27MetadataInterface:
         self,
         locations: List[em27_metadata.types.LocationMetadata],
         sensors: List[em27_metadata.types.SensorMetadata],
-        campaigns: List[em27_metadata.types.CampaignMetadata],
+        campaigns: List[em27_metadata.types.CampaignMetadata] = [],
     ):
+        """Create a new EM27MetadataInterface object.
+
+        During the instantiation, the integrity of the metadata is checked by
+        running the following tests:
+
+            * Location IDs are unique
+            * Sensor IDs are unique
+            * Campaign IDs are unique
+            * All location IDs referenced in sensors.json exist
+            * All sensor IDs referenced in campaigns.json exist
+            * All location IDs referenced in campaigns.json exist
+            * All time series elements in sensors.json have from_datetime < to_datetime
+            * The time series in sensors.json are sorted
+            * The time series in sensors.json have no overlaps
+        
+        Args:
+            locations:  A list of `LocationMetadata` objects.
+            sensors:    A list of `SensorMetadata` objects.
+            campaigns:  A list of `CampaignMetadata` objects.
+        
+        Returns:  An metadata object containing all the metadata that can now be queried
+                  locally using `metadata.get`.
+        
+        Raises:
+            pydantic.ValidationError:  If the metadata integrity checks fail.
+        """
+
         self.locations = locations
         self.sensors = sensors
         self.campaigns = campaigns
@@ -35,41 +62,44 @@ class EM27MetadataInterface:
         from_datetime: datetime.datetime,
         to_datetime: datetime.datetime,
     ) -> List[em27_metadata.types.SensorDataContext]:
-        """For a given `sensor_id` and `date`, return the metadata. The
-        returned list contains all locations at which the sensor has been
-        at between `$date 00:00:00 UTC` and `$date 23:59:59 UTC`. Each
-        item in the list is a `SensorDataContext` object which has
-        constant properties for the respective time period (same location,
-        UTC offset, pressure data source, calibration factors). I.e. when
-        requesting 24 hours and the location changed at noon, but all
-        other properties stayed the same, the returned list will contain
-        two items: One until noon, and one after noon.
+        """For a given `sensor_id` and `date`, return the list of metadata contexts.
+        
+        Each "context" is a time period where all metadata properties are constant.
+        For example, when requesting a full 24 hour day, and the location changed
+        at noon, but all other properties stayed the same, the returned list will
+        contain two items: One context until noon, and one context after noon.
 
-        Why is this so complex? Because every item in the time series
-        can have a different start and end timestamp. Every sensor data
-        context describes a time period where all of these properties
-        have a constant value.
+        With good organization of the metadata (no frequent switches of utc_offset,
+        pressure sources, etc.) the returned list should only contain one or two
+        items per day.
+        
+        Args:
+            sensor_id:      The sensor ID.
+            from_datetime:  The start of the requested time period.
+            to_datetime:    The end of the requested time period.
+        
+        Returns:  A list of `SensorDataContext` objects.
 
-        With good organization of the metadata (no frequent switches
-        of utc_offset, pressure sources, etc.) the returned list should
-        only contain one or two items per day.
+        Raises:
+            ValueError:      If the `sensor_id` is unknown or the `from_datetime` is
+                             greater than the given `to_datetime`.
+            AssertionError:  If there is a bug in the library.
+        """
 
-        The requested time period is not fixed on a date because some
-        teams (e.g. Japan) might record data from 22:00 UTC to 10:00 UTC
-        the next day: So the requested time period is 10 hours long, but
-        the data is recorded over two days. The retrieval currently does
-        not explicitly support this case yet because we don't know, how
-        overseas teams organize their data. But with this getter-function,
-        the changes to the retrieval pipeline should be minimal."""
+        # Why is this function so complex? Because every item in the time
+        # series can have a different start and end timestamp. And most of
+        # code is about determining these constant sections correctly.
 
         # get the sensor
-        assert sensor_id in self.sensor_ids, f'No location data for sensor_id "{sensor_id}"'
+        if sensor_id not in self.sensor_ids:
+            raise ValueError(f'No location data for sensor_id "{sensor_id}"')
         sensor = next(filter(lambda s: s.sensor_id == sensor_id, self.sensors))
 
         # check if date is valid
-        assert (
-            from_datetime <= to_datetime
-        ), f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
+        if from_datetime > to_datetime:
+            raise ValueError(
+                f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
+            )
 
         def parse_ts_data(ds: List[TimeseriesItem]) -> List[TimeseriesItem]:
             out: List[TimeseriesItem] = []
@@ -265,8 +295,6 @@ class EM27MetadataInterface:
 
 
 class _DatetimeSeriesItem(pydantic.BaseModel):
-    #model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
-
     from_datetime: datetime.datetime
     to_datetime: datetime.datetime
 
@@ -276,6 +304,10 @@ def _test_data_integrity(
     sensors: List[em27_metadata.types.SensorMetadata],
     campaigns: List[em27_metadata.types.CampaignMetadata],
 ) -> None:
+    """This function tests the integrity of the metadata.
+    
+    See the `EM27MetadataInterface` constructor for details."""
+
     location_ids = [s.location_id for s in locations]
     sensor_ids = [s.sensor_id for s in sensors]
     campaign_ids = [s.campaign_id for s in campaigns]

@@ -97,6 +97,10 @@ class LocationMetadata(pydantic.BaseModel):
     alt: float = pydantic.Field(..., ge=-20, le=10000)
 
 
+class LocationMetadataList(pydantic.BaseModel):
+    locations: List[LocationMetadata]
+
+
 class SensorMetadata(pydantic.BaseModel):
     """Metadata for a single sensor.
     
@@ -155,6 +159,10 @@ class SensorMetadata(pydantic.BaseModel):
     )
 
 
+class SensorMetadataList(pydantic.BaseModel):
+    sensors: List[SensorMetadata]
+
+
 class CampaignMetadata(TimeSeriesElement):
     campaign_id: str = pydantic.Field(
         ...,
@@ -170,9 +178,11 @@ class CampaignMetadata(TimeSeriesElement):
     location_ids: List[str]
 
 
-class SensorDataContext(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+class CampaignMetadataList(pydantic.BaseModel):
+    campaigns: List[CampaignMetadata]
 
+
+class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
     serial_number: int
     from_datetime: datetime.datetime

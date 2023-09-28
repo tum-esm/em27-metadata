@@ -1,5 +1,4 @@
-from typing import Any, Callable, Literal, Optional, List, Dict
-import json
+from typing import Optional, List
 import requests
 import em27_metadata
 
@@ -8,10 +7,22 @@ def _request_github_file(
     github_repository: str,
     filepath: str,
     access_token: Optional[str] = None,
-) -> List[Dict[Any, Any]]:
+) -> str:
     """Sends a request and returns the content of the response,
-    as a string. Raises an HTTPError if the response status code
-    is not 200."""
+    as a string.
+
+    Args:
+        github_repository:  The repository to load the metadata from, e.g. passing
+                            "em27/em27-metadata" would mean that the repository is
+                            hosted at `github.com/em27/em27-metadata`.
+        filepath:           The path to the file to load, e.g. "data/locations.json".
+        access_token:       The access token to use for the request. This is only
+                            required if the GitHub repository is private. You can
+                            read about these tokens at https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens.
+    
+    Raises:
+        requests.exceptions.HTTPError:  If the request to GitHub fails.
+    """
 
     url = f"https://raw.githubusercontent.com/{github_repository}/main/{filepath}"
     response = requests.get(
@@ -23,61 +34,54 @@ def _request_github_file(
         timeout=10,
     )
     response.raise_for_status()
-    try:
-        response = json.loads(response.text)
-        assert isinstance(response, List)
-        assert all(isinstance(r, Dict) for r in response)
-        return response
-    except (json.JSONDecodeError, AssertionError):
-        raise ValueError(f"file at '{url}' is not a valid json file")
+    return response.text
 
 
 def load_from_github(
     github_repository: str,
     access_token: Optional[str] = None,
 ) -> em27_metadata.interfaces.EM27MetadataInterface:
-    """Loads an EM27MetadataInterface from GitHub"""
+    """Loads an EM27MetadataInterface from GitHub
+    
+    Args:
+        github_repository:  The repository to load the metadata from, e.g. passing
+                            "em27/em27-metadata" would mean that the repository is
+                            hosted at `github.com/em27/em27-metadata`.
+        access_token:       The access token to use for the request. This is only
+                            required if the GitHub repository is private. You can
+                            read about these tokens at https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens.
+    
+    Returns:  An metadata object containing all the metadata that can now be queried
+              locally using `metadata.get`.
 
-    _req: Callable[[str], List[Dict[Any,
-                                    Any]]] = lambda t: _request_github_file(
-                                        github_repository=github_repository,
-                                        filepath=f"data/{t}.json",
-                                        access_token=access_token,
-                                    )
+    Raises:
+        requests.exceptions.HTTPError:  If the request to GitHub fails.
+        pydantic.ValidationError:       If the response is not in a valid format.
+    """
+
     return em27_metadata.interfaces.EM27MetadataInterface(
-        locations=[
-            em27_metadata.types.LocationMetadata(**l)
-            for l in _req("locations")
-        ],
-        sensors=[
-            em27_metadata.types.SensorMetadata(**l) for l in _req("sensors")
-        ],
-        campaigns=[
-            em27_metadata.types.CampaignMetadata(**l)
-            for l in _req("campaigns")
-        ],
+        locations=em27_metadata.types.LocationMetadataList.model_validate_json(
+            _request_github_file(
+                github_repository=github_repository,
+                filepath=f"data/locations.json",
+                access_token=access_token,
+            )
+        ).locations,
+        sensors=em27_metadata.types.SensorMetadataList.model_validate_json(
+            _request_github_file(
+                github_repository=github_repository,
+                filepath=f"data/sensors.json",
+                access_token=access_token,
+            )
+        ).sensors,
+        campaigns=em27_metadata.types.CampaignMetadataList.model_validate_json(
+            _request_github_file(
+                github_repository=github_repository,
+                filepath=f"data/campaigns.json",
+                access_token=access_token,
+            )
+        ).campaigns,
     )
-
-
-def _load_json_list(
-    filepath: Optional[str], name: Literal["locations", "sensors", "campaigns"]
-) -> List[Dict[Any, Any]]:
-    if filepath is None:
-        return []
-    try:
-        with open(filepath) as f:
-            response = json.load(f)
-        assert isinstance(response, List)
-        assert all(isinstance(r, Dict) for r in response)
-        return response
-    except FileNotFoundError:
-        raise ValueError(f"{name} file at ({filepath}) does not exist")
-    except json.JSONDecodeError:
-        raise ValueError(
-            f"{name} file at ({filepath}) is not a valid json file"
-        )
-    except AssertionError:
-        raise ValueError(f"{name} file at ({filepath}) is not a list")
 
 
 def load_from_local_files(
@@ -85,18 +89,40 @@ def load_from_local_files(
     sensors_path: str,
     campaigns_path: Optional[str] = None,
 ) -> em27_metadata.interfaces.EM27MetadataInterface:
-    """loads an EM27MetadataInterface from local files"""
+    """Loads an EM27MetadataInterface from local files.
+    
+    Args:
+        locations_path:  path to the locations file, e.g. "data/locations.json"
+        sensors_path:    path to the sensors file, e.g. "data/sensors.json"
+        campaigns_path:  path to the campaigns file, e.g. "data/campaigns.json" not
+                         required for the profile download and the retrieval in the
+                         EM27 Retrieval Pipeline
+    
+    Returns:  An metadata object containing all the metadata that can now be queried
+              locally using `metadata.get`.
+    
+    Raises:
+        FileNotFoundError:              If a file does not exist.
+        pydantic.ValidationError:       If a file is not in a valid format.
+    """
 
-    locations = _load_json_list(locations_path, "locations")
-    sensors = _load_json_list(sensors_path, "sensors")
-    campaigns = _load_json_list(campaigns_path, "campaigns")
+    with open(locations_path) as f:
+        locations = em27_metadata.types.LocationMetadataList.model_validate_json(
+            f.read()
+        ).locations
+
+    with open(sensors_path) as f:
+        sensors = em27_metadata.types.SensorMetadataList.model_validate_json(
+            f.read()
+        ).sensors
+
+    campaigns: List[em27_metadata.types.CampaignMetadata] = []
+    if campaigns_path is not None:
+        with open(campaigns_path) as f:
+            campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(
+                f.read()
+            ).campaigns
 
     return em27_metadata.interfaces.EM27MetadataInterface(
-        locations=[
-            em27_metadata.types.LocationMetadata(**l) for l in locations
-        ],
-        sensors=[em27_metadata.types.SensorMetadata(**l) for l in sensors],
-        campaigns=[
-            em27_metadata.types.CampaignMetadata(**l) for l in campaigns
-        ],
+        locations=locations, sensors=sensors, campaigns=campaigns
     )
