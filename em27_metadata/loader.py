@@ -38,15 +38,24 @@ def load_from_github(
 ) -> em27_metadata.interfaces.EM27MetadataInterface:
     """Loads an EM27MetadataInterface from GitHub"""
 
-    _req: Callable[[str], List[Dict[Any, Any]]] = lambda t: _request_github_file(
-        github_repository=github_repository,
-        filepath=f"data/{t}.json",
-        access_token=access_token,
-    )
+    _req: Callable[[str], List[Dict[Any,
+                                    Any]]] = lambda t: _request_github_file(
+                                        github_repository=github_repository,
+                                        filepath=f"data/{t}.json",
+                                        access_token=access_token,
+                                    )
     return em27_metadata.interfaces.EM27MetadataInterface(
-        locations=[em27_metadata.types.LocationMetadata(**l) for l in _req("locations")],
-        sensors=[em27_metadata.types.SensorMetadata(**l) for l in _req("sensors")],
-        campaigns=[em27_metadata.types.CampaignMetadata(**l) for l in _req("campaigns")],
+        locations=[
+            em27_metadata.types.LocationMetadata(**l)
+            for l in _req("locations")
+        ],
+        sensors=[
+            em27_metadata.types.SensorMetadata(**l) for l in _req("sensors")
+        ],
+        campaigns=[
+            em27_metadata.types.CampaignMetadata(**l)
+            for l in _req("campaigns")
+        ],
     )
 
 
@@ -64,7 +73,9 @@ def _load_json_list(
     except FileNotFoundError:
         raise ValueError(f"{name} file at ({filepath}) does not exist")
     except json.JSONDecodeError:
-        raise ValueError(f"{name} file at ({filepath}) is not a valid json file")
+        raise ValueError(
+            f"{name} file at ({filepath}) is not a valid json file"
+        )
     except AssertionError:
         raise ValueError(f"{name} file at ({filepath}) is not a list")
 
@@ -81,7 +92,11 @@ def load_from_local_files(
     campaigns = _load_json_list(campaigns_path, "campaigns")
 
     return em27_metadata.interfaces.EM27MetadataInterface(
-        locations=[em27_metadata.types.LocationMetadata(**l) for l in locations],
+        locations=[
+            em27_metadata.types.LocationMetadata(**l) for l in locations
+        ],
         sensors=[em27_metadata.types.SensorMetadata(**l) for l in sensors],
-        campaigns=[em27_metadata.types.CampaignMetadata(**l) for l in campaigns],
+        campaigns=[
+            em27_metadata.types.CampaignMetadata(**l) for l in campaigns
+        ],
     )

@@ -20,23 +20,19 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
-black = "^22.12.0"
 mypy = "^1.5.1"
 types-requests = "^2.31.0.6"
+yapf = "^0.40.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 100
 
 [tool.mypy]
 strict = true
 implicit_reexport = true
 no_warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
-
 
 [[tool.mypy.overrides]]
 module = ["pendulum"]
@@ -48,3 +44,10 @@ markers = [
     "action: run when using this repo as a GitHub Action",
     "local: run locally",
 ]
+
+[tool.yapf]
+based_on_style = "facebook"
+coalesce_brackets = true
+split_before_dict_set_generator = true
+each_dict_entry_on_separate_line = false
+spaces_around_subscript_colon = true

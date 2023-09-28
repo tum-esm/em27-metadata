@@ -75,7 +75,8 @@ class EM27MetadataInterface:
         def parse_ts_data(ds: List[TimeseriesItem]) -> List[TimeseriesItem]:
             out: List[TimeseriesItem] = []
             for d in ds:
-                if (d.to_datetime <= from_datetime) or (d.from_datetime >= to_datetime):
+                if (d.to_datetime
+                    <= from_datetime) or (d.from_datetime >= to_datetime):
                     continue
 
                 cropped_d = d.model_copy()
@@ -86,7 +87,9 @@ class EM27MetadataInterface:
                 out.append(cropped_d)
             return out
 
-        def fill_ts_data_gaps_with_default(ds: List[TimeseriesItem], default_item: TimeseriesItem) -> List[TimeseriesItem]:
+        def fill_ts_data_gaps_with_default(
+            ds: List[TimeseriesItem], default_item: TimeseriesItem
+        ) -> List[TimeseriesItem]:
             out: List[TimeseriesItem] = []
 
             if len(ds) == 0:
@@ -99,23 +102,22 @@ class EM27MetadataInterface:
                 if ds[0].from_datetime > from_datetime:
                     new_first_element = default_item.model_copy()
                     new_first_element.from_datetime = from_datetime
-                    new_first_element.to_datetime = ds[0].from_datetime - datetime.timedelta(
-                        seconds=1
-                    )
+                    new_first_element.to_datetime = ds[
+                        0].from_datetime - datetime.timedelta(seconds=1)
                     out.append(new_first_element)
 
                 # iterate over all elements and add default elements in between
                 # if there is a time gap between two elements
                 for i in range(len(ds) - 1):
                     out.append(ds[i])
-                    if ds[i].to_datetime < ds[i + 1].from_datetime - datetime.timedelta(seconds=1):
+                    if ds[i].to_datetime < ds[
+                        i + 1].from_datetime - datetime.timedelta(seconds=1):
                         new_element = default_item.model_copy()
-                        new_element.from_datetime = ds[i].to_datetime + datetime.timedelta(
-                            seconds=1
-                        )
-                        new_element.to_datetime = ds[i + 1].from_datetime - datetime.timedelta(
-                            seconds=1
-                        )
+                        new_element.from_datetime = ds[
+                            i].to_datetime + datetime.timedelta(seconds=1)
+                        new_element.to_datetime = ds[
+                            i +
+                            1].from_datetime - datetime.timedelta(seconds=1)
                         out.append(new_element)
 
                 # append last element
@@ -124,14 +126,13 @@ class EM27MetadataInterface:
                 # if last element ends before requested time period
                 if ds[-1].to_datetime < to_datetime:
                     new_last_element = default_item.model_copy()
-                    new_last_element.from_datetime = ds[-1].to_datetime + datetime.timedelta(
-                        seconds=1
-                    )
+                    new_last_element.from_datetime = ds[
+                        -1].to_datetime + datetime.timedelta(seconds=1)
                     new_last_element.to_datetime = to_datetime
                     out.append(new_last_element)
 
             assert len(out) > 0, "This is a bug in the library"
-            for _e1, _e2 in zip(out[:-1], out[1:]):
+            for _e1, _e2 in zip(out[:-1], out[1 :]):
                 assert (
                     _e1.to_datetime + datetime.timedelta(seconds=1)
                 ) == _e2.from_datetime, "This is a bug in the library"
@@ -152,7 +153,9 @@ class EM27MetadataInterface:
         # fill data gaps with default values
         utc_offsets = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_utc_offsets),
-            em27_metadata.types.SensorTypes.DifferentUTCOffset(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentUTCOffset(
+                **default_time_values
+            ),
         )
 
         # get all pressure data sources matching the time period
@@ -168,14 +171,18 @@ class EM27MetadataInterface:
         # fill data gaps with default values
         pressure_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_pressure_calibration_factors),
-            em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor(
+                **default_time_values
+            ),
         )
 
         # get all output calibration factors matching the time period
         # fill data gaps with default values
         output_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_output_calibration_factors),
-            em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor(
+                **default_time_values
+            ),
         )
 
         # now we can assume that we have continuous `utc_offsets`, `pressure_data_sources`,
@@ -191,34 +198,42 @@ class EM27MetadataInterface:
 
         breakpoints: List[datetime.datetime] = list(
             sorted(
-                set(
-                    [
-                        *[sl.from_datetime for sl in sensor_locations],
-                        *[sl.to_datetime for sl in sensor_locations],
-                        *[uo.from_datetime for uo in utc_offsets],
-                        *[uo.to_datetime for uo in utc_offsets],
-                        *[pds.from_datetime for pds in pressure_data_sources],
-                        *[pds.to_datetime for pds in pressure_data_sources],
-                        *[pcf.from_datetime for pcf in pressure_calibration_factors],
-                        *[pcf.to_datetime for pcf in pressure_calibration_factors],
-                        *[ocf.from_datetime for ocf in output_calibration_factors],
-                        *[ocf.to_datetime for ocf in output_calibration_factors],
-                    ]
-                )
+                set([
+                    *[sl.from_datetime for sl in sensor_locations],
+                    *[sl.to_datetime for sl in sensor_locations],
+                    *[uo.from_datetime for uo in utc_offsets],
+                    *[uo.to_datetime for uo in utc_offsets],
+                    *[pds.from_datetime for pds in pressure_data_sources],
+                    *[pds.to_datetime for pds in pressure_data_sources],
+                    *[
+                        pcf.from_datetime
+                        for pcf in pressure_calibration_factors
+                    ],
+                    *[pcf.to_datetime for pcf in pressure_calibration_factors],
+                    *[ocf.from_datetime for ocf in output_calibration_factors],
+                    *[ocf.to_datetime for ocf in output_calibration_factors],
+                ])
             )
         )
         sensor_data_contexts: List[em27_metadata.types.SensorDataContext] = []
 
-        for segment_from_datetime, segment_to_datetime in zip(breakpoints[:-1], breakpoints[1:]):
+        for segment_from_datetime, segment_to_datetime in zip(
+            breakpoints[:-1], breakpoints[1 :]
+        ):
 
-            def _get_segment_property(property_list: List[TimeseriesItem]) -> TimeseriesItem:
+            def _get_segment_property(
+                property_list: List[TimeseriesItem]
+            ) -> TimeseriesItem:
                 """raises IndexError if there is no property for the segment"""
                 candidates = list(
                     filter(
-                        lambda p: (
-                            (p.from_datetime <= segment_from_datetime <= p.to_datetime)
-                            and (p.from_datetime <= segment_to_datetime <= p.to_datetime)
-                        ),
+                        lambda p: ((
+                            p.from_datetime <= segment_from_datetime <= p.
+                            to_datetime
+                        ) and (
+                            p.from_datetime <= segment_to_datetime <= p.
+                            to_datetime
+                        )),
                         property_list,
                     )
                 )
@@ -235,7 +250,12 @@ class EM27MetadataInterface:
                 continue
 
             try:
-                location = next(filter(lambda l: l.location_id == sl.location_id, self.locations))
+                location = next(
+                    filter(
+                        lambda l: l.location_id == sl.location_id,
+                        self.locations
+                    )
+                )
             except StopIteration:
                 raise AssertionError("This is a bug in the library")
 
@@ -281,9 +301,11 @@ def _test_data_integrity(
     campaign_ids = [s.campaign_id for s in campaigns]
 
     # unique ids
-    assert len(set(location_ids)) == len(location_ids), "location ids are not unique"
+    assert len(set(location_ids)
+              ) == len(location_ids), "location ids are not unique"
     assert len(set(sensor_ids)) == len(sensor_ids), "sensor ids are not unique"
-    assert len(set(campaign_ids)) == len(campaign_ids), "campaign ids are not unique"
+    assert len(set(campaign_ids)
+              ) == len(campaign_ids), "campaign ids are not unique"
 
     # reference existence in sensors.json
     for s1 in sensors:
@@ -301,8 +323,14 @@ def _test_data_integrity(
     for s3 in sensors:
         for timeseries in [
             [_DatetimeSeriesItem(**l2.model_dump()) for l2 in s3.locations],
-            [_DatetimeSeriesItem(**l2.model_dump()) for l2 in s3.different_utc_offsets],
-            [_DatetimeSeriesItem(**l2.model_dump()) for l2 in s3.different_pressure_data_sources],
+            [
+                _DatetimeSeriesItem(**l2.model_dump())
+                for l2 in s3.different_utc_offsets
+            ],
+            [
+                _DatetimeSeriesItem(**l2.model_dump())
+                for l2 in s3.different_pressure_data_sources
+            ],
             [
                 _DatetimeSeriesItem(**l2.model_dump())
                 for l2 in s3.different_pressure_calibration_factors
@@ -317,7 +345,7 @@ def _test_data_integrity(
                     _item.from_datetime < _item.to_datetime
                 ), f"from_datetime ({_item.from_datetime}) has to less equal to_datetime ({_item.to_datetime})"
 
-            for _item_1, _item_2 in zip(timeseries[:-1], timeseries[1:]):
+            for _item_1, _item_2 in zip(timeseries[:-1], timeseries[1 :]):
                 assert (
                     _item_1.to_datetime < _item_2.from_datetime
                 ), f"time periods are overlapping or not sorted: {_item_1.model_dump()}, {_item_2.model_dump()}"
