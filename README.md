@@ -121,6 +121,6 @@ poetry publish
 
 In order to test the "get metadata for a time period" function, the following example is used:
 
-![](./data/example.png)
+![](./docs/example.png)
 
 The test `tests/test_data_integrity.py` requests the time period `00:00` to `23:59`. The UTC offsets are specified (to be non-zero) from `02:00` to `15:59`, where it has one non-zero value, and from `16:00` to `21:59`, where it has another non-zero value. Each property has two (non-default) values over the day. There should be eight resulting chunks of metadata. All properties of each chunk are validated in the test.
