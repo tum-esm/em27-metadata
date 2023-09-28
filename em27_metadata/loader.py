@@ -61,25 +61,25 @@ def load_from_github(
 
     return em27_metadata.interfaces.EM27MetadataInterface(
         locations=em27_metadata.types.LocationMetadataList.model_validate_json(
-            _request_github_file(
+            '{"locations": ' + _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/locations.json",
                 access_token=access_token,
-            )
+            ) + "}"
         ).locations,
         sensors=em27_metadata.types.SensorMetadataList.model_validate_json(
-            _request_github_file(
+            '{"sensors": ' + _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/sensors.json",
                 access_token=access_token,
-            )
+            ) + "}"
         ).sensors,
         campaigns=em27_metadata.types.CampaignMetadataList.model_validate_json(
-            _request_github_file(
+            '{"campaigns": ' + _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/campaigns.json",
                 access_token=access_token,
-            )
+            ) + "}"
         ).campaigns,
     )
 
