@@ -1,11 +1,10 @@
 import datetime
 import os
 import json
-from os.path import dirname
 import pytest
 import em27_metadata
 
-DATA_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 
 
 @pytest.mark.ci

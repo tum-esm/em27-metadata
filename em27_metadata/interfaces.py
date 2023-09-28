@@ -1,5 +1,5 @@
+from typing import Any, TypeVar, List
 import datetime
-from typing import Any, TypeVar
 import pydantic
 import em27_metadata
 
@@ -16,9 +16,9 @@ TimeseriesItem = TypeVar(
 class EM27MetadataInterface:
     def __init__(
         self,
-        locations: list[em27_metadata.types.LocationMetadata],
-        sensors: list[em27_metadata.types.SensorMetadata],
-        campaigns: list[em27_metadata.types.CampaignMetadata],
+        locations: List[em27_metadata.types.LocationMetadata],
+        sensors: List[em27_metadata.types.SensorMetadata],
+        campaigns: List[em27_metadata.types.CampaignMetadata],
     ):
         self.locations = locations
         self.sensors = sensors
@@ -35,7 +35,7 @@ class EM27MetadataInterface:
         sensor_id: str,
         from_datetime: datetime.datetime,
         to_datetime: datetime.datetime,
-    ) -> list[em27_metadata.types.SensorDataContext]:
+    ) -> List[em27_metadata.types.SensorDataContext]:
         """For a given `sensor_id` and `date`, return the metadata. The
         returned list contains all locations at which the sensor has been
         at between `$date 00:00:00 UTC` and `$date 23:59:59 UTC`. Each
@@ -72,8 +72,8 @@ class EM27MetadataInterface:
             from_datetime <= to_datetime
         ), f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
 
-        def parse_ts_data(ds: list[TimeseriesItem]) -> list[TimeseriesItem]:
-            out: list[TimeseriesItem] = []
+        def parse_ts_data(ds: List[TimeseriesItem]) -> List[TimeseriesItem]:
+            out: List[TimeseriesItem] = []
             for d in ds:
                 if (d.to_datetime <= from_datetime) or (d.from_datetime >= to_datetime):
                     continue
@@ -86,8 +86,8 @@ class EM27MetadataInterface:
                 out.append(cropped_d)
             return out
 
-        def fill_ts_data_gaps_with_default(ds: list[TimeseriesItem], default_item: TimeseriesItem) -> list[TimeseriesItem]:
-            out: list[TimeseriesItem] = []
+        def fill_ts_data_gaps_with_default(ds: List[TimeseriesItem], default_item: TimeseriesItem) -> List[TimeseriesItem]:
+            out: List[TimeseriesItem] = []
 
             if len(ds) == 0:
                 new_element = default_item.model_copy()
@@ -189,7 +189,7 @@ class EM27MetadataInterface:
         # we split the context into to. The we do this joining/splitting for the other time
         # series properties as well.
 
-        breakpoints: list[datetime.datetime] = list(
+        breakpoints: List[datetime.datetime] = list(
             sorted(
                 set(
                     [
@@ -207,11 +207,11 @@ class EM27MetadataInterface:
                 )
             )
         )
-        sensor_data_contexts: list[em27_metadata.types.SensorDataContext] = []
+        sensor_data_contexts: List[em27_metadata.types.SensorDataContext] = []
 
         for segment_from_datetime, segment_to_datetime in zip(breakpoints[:-1], breakpoints[1:]):
 
-            def _get_segment_property(property_list: list[TimeseriesItem]) -> TimeseriesItem:
+            def _get_segment_property(property_list: List[TimeseriesItem]) -> TimeseriesItem:
                 """raises IndexError if there is no property for the segment"""
                 candidates = list(
                     filter(
@@ -272,9 +272,9 @@ class _DatetimeSeriesItem(pydantic.BaseModel):
 
 
 def _test_data_integrity(
-    locations: list[em27_metadata.types.LocationMetadata],
-    sensors: list[em27_metadata.types.SensorMetadata],
-    campaigns: list[em27_metadata.types.CampaignMetadata],
+    locations: List[em27_metadata.types.LocationMetadata],
+    sensors: List[em27_metadata.types.SensorMetadata],
+    campaigns: List[em27_metadata.types.CampaignMetadata],
 ) -> None:
     location_ids = [s.location_id for s in locations]
     sensor_ids = [s.sensor_id for s in sensors]

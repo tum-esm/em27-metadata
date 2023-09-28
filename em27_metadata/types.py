@@ -1,6 +1,6 @@
+from typing import Any, Optional, List
 import datetime
 import re
-from typing import Any, Optional
 import pydantic
 
 
@@ -50,9 +50,9 @@ class SensorTypes:
         for one airmass-independent and one airmass-dependent
         factor (see Ohyama 2021)."""
 
-        factors_xco2: list[float] = pydantic.Field([1], description="Calibration factors for XCO2.")
-        factors_xch4: list[float] = pydantic.Field([1], description="Calibration factors for XCH4.")
-        factors_xco: list[float] = pydantic.Field([1], description="Calibration factors for XCO.")
+        factors_xco2: List[float] = pydantic.Field([1], description="Calibration factors for XCO2.")
+        factors_xch4: List[float] = pydantic.Field([1], description="Calibration factors for XCH4.")
+        factors_xco: List[float] = pydantic.Field([1], description="Calibration factors for XCO.")
         calibration_scheme: Optional[str] = pydantic.Field(
             None,
             description=(
@@ -102,9 +102,9 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    locations: list[SensorTypes.Location] = pydantic.Field(..., min_length=0)
+    locations: List[SensorTypes.Location] = pydantic.Field(..., min_length=0)
 
-    different_utc_offsets: list[SensorTypes.DifferentUTCOffset] = pydantic.Field(
+    different_utc_offsets: List[SensorTypes.DifferentUTCOffset] = pydantic.Field(
         [],
         min_length=0,
         description=(
@@ -112,7 +112,7 @@ class SensorMetadata(pydantic.BaseModel):
             + "data. Only required if the UTC offset is non zero."
         ),
     )
-    different_pressure_data_sources: list[SensorTypes.DifferentPressureDataSource] = pydantic.Field(
+    different_pressure_data_sources: List[SensorTypes.DifferentPressureDataSource] = pydantic.Field(
         [],
         min_length=0,
         description=(
@@ -120,7 +120,7 @@ class SensorMetadata(pydantic.BaseModel):
             + " source is the stations built-in pressure sensor."
         ),
     )
-    different_pressure_calibration_factors: list[
+    different_pressure_calibration_factors: List[
         SensorTypes.DifferentPressureCalibrationFactor
     ] = pydantic.Field(
         [],
@@ -131,7 +131,7 @@ class SensorMetadata(pydantic.BaseModel):
         ),
     )
 
-    different_output_calibration_factors: list[
+    different_output_calibration_factors: List[
         SensorTypes.DifferentOutputCalibrationFactor
     ] = pydantic.Field(
         [],
@@ -151,8 +151,8 @@ class CampaignMetadata(TimeSeriesElement):
             + "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
-    sensor_ids: list[str]
-    location_ids: list[str]
+    sensor_ids: List[str]
+    location_ids: List[str]
 
 
 class SensorDataContext(pydantic.BaseModel):
@@ -168,9 +168,9 @@ class SensorDataContext(pydantic.BaseModel):
     pressure_data_source: str
     pressure_calibration_factor: float
 
-    output_calibration_factors_xco2: list[float]
-    output_calibration_factors_xch4: list[float]
-    output_calibration_factors_xco: list[float]
+    output_calibration_factors_xco2: List[float]
+    output_calibration_factors_xch4: List[float]
+    output_calibration_factors_xco: List[float]
     output_calibration_scheme: Optional[str]
 
     multiple_ctx_on_this_date: bool
