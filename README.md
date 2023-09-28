@@ -4,11 +4,11 @@
 
 This repository is the single source of truth for our EM27 measurement logistics: "Where has each station been on each day of measurements?" We selected this format over putting it in a database due to various reasons:
 
--   Easy to read, modify and extend by selective group members using GitHub permissions
--   Changes to this are more evident here than in database logs
--   Versioning (easy to revert mistakes)
--   Automatic testing of the files integrities
--   Easy import as a statically typed Python library
+- Easy to read, modify and extend by selective group members using GitHub permissions
+- Changes to this are more evident here than in database logs
+- Versioning (easy to revert mistakes)
+- Automatic testing of the files integrities
+- Easy import as a statically typed Python library
 
 <br/>
 
@@ -29,7 +29,7 @@ pip install em27-metadata
 ```
 
 ```python
-import pendulum
+import datetime
 import em27_metadata
 
 em27_metadata_store = em27_metadata.load_from_github(
@@ -46,10 +46,10 @@ em27_metadata_store = em27_metadata.load_from_local_files(
 
 metadata = em27_metadata_store.get(
     sensor_id = "ma",
-    from_datetime = pendulum.DateTime(
+    from_datetime = datetime.datetime(
         year=2022, month=6, day=1, hour=0, minute=0, second=0
     ),
-    to_datetime = pendulum.DateTime(
+    to_datetime = datetime.datetime(
         year=2022, month=6, day=1, hour=23, minute=59, second=59
     ),
 )
@@ -62,26 +62,26 @@ Prints out:
 
 ```json
 [
-    {
-        "sensor_id": "ma",
-        "serial_number": 61,
-        "from_datetime": "2022-06-01T00:00:00+00:00",
-        "to_datetime": "2022-06-01T23:59:59+00:00",
-        "location": {
-            "location_id": "TUM_I",
-            "details": "TUM Dach Innenstadt",
-            "lon": 11.569,
-            "lat": 48.151,
-            "alt": 539
-        },
-        "utc_offset": 0,
-        "pressure_data_source": "ma",
-        "pressure_calibration_factor": 1,
-        "output_calibration_factors_xco2": 1,
-        "output_calibration_factors_xch4": 1,
-        "output_calibration_factors_xco": 1,
-        "output_calibration_scheme": null
-    }
+  {
+    "sensor_id": "ma",
+    "serial_number": 61,
+    "from_datetime": "2022-06-01T00:00:00+00:00",
+    "to_datetime": "2022-06-01T23:59:59+00:00",
+    "location": {
+      "location_id": "TUM_I",
+      "details": "TUM Dach Innenstadt",
+      "lon": 11.569,
+      "lat": 48.151,
+      "alt": 539
+    },
+    "utc_offset": 0,
+    "pressure_data_source": "ma",
+    "pressure_calibration_factor": 1,
+    "output_calibration_factors_xco2": 1,
+    "output_calibration_factors_xch4": 1,
+    "output_calibration_factors_xco": 1,
+    "output_calibration_scheme": null
+  }
 ]
 ```
 

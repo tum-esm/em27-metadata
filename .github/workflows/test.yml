@@ -1,44 +1,51 @@
-name: "test-python-library"
+name: "test"
 on: push
 jobs:
-    test:
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Check out repository
-              uses: actions/checkout@v3
-            - name: Set up Python 3.9.16
-              uses: actions/setup-python@v4
-              with:
-                  python-version: 3.9.16
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
 
-            # try to load cached venv
-            - name: Load cached venv
-              id: cached-poetry-dependencies
-              uses: actions/cache@v3
-              with:
-                  path: .venv
-                  key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('poetry.lock') }}
+      # try to load cached venv
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python_version }}-${{ hashFiles('poetry.lock') }}
 
-            # install & configure poetry if cache does not exist
-            - name: Install Poetry
-              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              uses: snok/install-poetry@v1
-              with:
-                  version: 1.5.1
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
-                  installer-parallel: true
+      # install & configure poetry if cache does not exist
+      - name: Install Poetry
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.6.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --with=dev
 
-            # install dependencies if cache does not exist
-            - name: Install dependencies
-              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              run: poetry install --with=dev
-              shell: bash
+      # run tests
+      - name: Run pytests
+        env:
+          GITHUB_REPOSITORY: ${{ github.action_repository }}
+          GITHUB_ACCESS_TOKEN: ${{ github.token }}
+        run: .venv/bin/python -m pytest tests/ -m "ci"
 
-            # run tests
-            - name: Run pytests
-              env:
-                  GITHUB_REPOSITORY: ${{ github.action_repository }}
-                  GITHUB_ACCESS_TOKEN: ${{ github.token }}
-              run: .venv/bin/python -m pytest tests/ -m "ci"
-              shell: bash
+      - name: Check whether code formatting is correct
+        run: |
+          .venv/bin/python -m yapf em27_metadata --recursive --quiet
+          .venv/bin/python -m yapf tests --recursive --quiet
