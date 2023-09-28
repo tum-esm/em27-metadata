@@ -3,7 +3,7 @@ import os
 import json
 from os.path import dirname
 import pytest
-from tum_esm_em27_metadata import interfaces, types
+import em27_metadata
 
 DATA_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "data")
 
@@ -13,15 +13,15 @@ DATA_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "data")
 @pytest.mark.local
 def test_data_integrity() -> None:
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
-        locations = [types.LocationMetadata(**l) for l in json.load(f)]
+        locations = [em27_metadata.types.LocationMetadata(**l) for l in json.load(f)]
 
     with open(os.path.join(DATA_DIR, "sensors.json")) as f:
-        sensors = [types.SensorMetadata(**l) for l in json.load(f)]
+        sensors = [em27_metadata.types.SensorMetadata(**l) for l in json.load(f)]
 
     with open(os.path.join(DATA_DIR, "campaigns.json")) as f:
-        campaigns = [types.CampaignMetadata(**l) for l in json.load(f)]
+        campaigns = [em27_metadata.types.CampaignMetadata(**l) for l in json.load(f)]
 
-    location_data = interfaces.EM27MetadataInterface(locations, sensors, campaigns)
+    location_data = em27_metadata.interfaces.EM27MetadataInterface(locations, sensors, campaigns)
 
     example_sensor = location_data.sensors[0]
     example_sensor_location = example_sensor.locations[0]
@@ -43,7 +43,7 @@ def test_data_integrity() -> None:
 @pytest.mark.local
 def test_getter_function() -> None:
     locations = [
-        types.LocationMetadata(
+        em27_metadata.types.LocationMetadata(
             **{
                 "location_id": "lid1",
                 "details": "description of location 1",
@@ -52,7 +52,7 @@ def test_getter_function() -> None:
                 "alt": 500,
             }
         ),
-        types.LocationMetadata(
+        em27_metadata.types.LocationMetadata(
             **{
                 "location_id": "lid2",
                 "details": "description of location 2",
@@ -63,7 +63,7 @@ def test_getter_function() -> None:
         ),
     ]
     sensors = [
-        types.SensorMetadata(
+        em27_metadata.types.SensorMetadata(
             **{
                 "sensor_id": "sid1",
                 "serial_number": 51,
@@ -137,7 +137,7 @@ def test_getter_function() -> None:
         ),
     ]
 
-    location_data = interfaces.EM27MetadataInterface(locations, sensors, campaigns=[])
+    location_data = em27_metadata.interfaces.EM27MetadataInterface(locations, sensors, campaigns=[])
 
     from_datetime = datetime.datetime.fromisoformat("2020-02-01T00:00:00+00:00")
     to_datetime = datetime.datetime.fromisoformat("2020-02-01T23:59:59+00:00")

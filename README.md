@@ -23,28 +23,28 @@ This repository only contains a Python library to interact with the metadata. Th
 Install as a library:
 
 ```bash
-poetry add tum-esm-em27-metadata
+poetry add em27-metadata
 # or
-pip install tum-esm-em27-metadata
+pip install em27-metadata
 ```
 
 ```python
 import pendulum
-import tum_esm_em27_metadata
+import em27_metadata
 
-em27_metadata = tum_esm_em27_metadata.load_from_github(
+em27_metadata_store = em27_metadata.load_from_github(
     github_repository="org-name/repo-name",
     access_token="your-github-access-token",
 )
 
 # or load it from local files
-em27_metadata = tum_esm_em27_metadata.load_from_local_files(
+em27_metadata_store = em27_metadata.load_from_local_files(
     locations_path="location-data/locations.json",
     sensors_path="location-data/sensors.json",
     campaigns_path="location-data/campaigns.json",
 )
 
-metadata = em27_metadata.get(
+metadata = em27_metadata_store.get(
     sensor_id = "ma",
     from_datetime = pendulum.DateTime(
         year=2022, month=6, day=1, hour=0, minute=0, second=0
@@ -85,7 +85,7 @@ Prints out:
 ]
 ```
 
-The object returned by `em27_metadata.get()` is of type `lis[tum_esm_em27_metadata.types.SensorDataContext]`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.model_dump()`.
+The object returned by `em27_metadata_store.get()` is of type `list[em27_metadata.types.SensorDataContext]`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.model_dump()`.
 
 The list will contain one item per time period where the metadata properties are continuous (same location, etc.). You can find dummy data in the `data/` folder.
 

@@ -1,24 +1,24 @@
 import datetime
 from typing import Any, TypeVar
 import pydantic
-from tum_esm_em27_metadata import types
+import em27_metadata
 
-T = TypeVar(
-    "T",
-    types.SensorTypes.Location,
-    types.SensorTypes.DifferentUTCOffset,
-    types.SensorTypes.DifferentPressureDataSource,
-    types.SensorTypes.DifferentPressureCalibrationFactor,
-    types.SensorTypes.DifferentOutputCalibrationFactor,
+TimeseriesItem = TypeVar(
+    "TimeseriesItem",
+    em27_metadata.types.SensorTypes.Location,
+    em27_metadata.types.SensorTypes.DifferentUTCOffset,
+    em27_metadata.types.SensorTypes.DifferentPressureDataSource,
+    em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor,
+    em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor,
 )
 
 
 class EM27MetadataInterface:
     def __init__(
         self,
-        locations: list[types.LocationMetadata],
-        sensors: list[types.SensorMetadata],
-        campaigns: list[types.CampaignMetadata],
+        locations: list[em27_metadata.types.LocationMetadata],
+        sensors: list[em27_metadata.types.SensorMetadata],
+        campaigns: list[em27_metadata.types.CampaignMetadata],
     ):
         self.locations = locations
         self.sensors = sensors
@@ -35,7 +35,7 @@ class EM27MetadataInterface:
         sensor_id: str,
         from_datetime: datetime.datetime,
         to_datetime: datetime.datetime,
-    ) -> list[types.SensorDataContext]:
+    ) -> list[em27_metadata.types.SensorDataContext]:
         """For a given `sensor_id` and `date`, return the metadata. The
         returned list contains all locations at which the sensor has been
         at between `$date 00:00:00 UTC` and `$date 23:59:59 UTC`. Each
@@ -72,8 +72,8 @@ class EM27MetadataInterface:
             from_datetime <= to_datetime
         ), f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
 
-        def parse_ts_data(ds: list[T]) -> list[T]:
-            out: list[T] = []
+        def parse_ts_data(ds: list[TimeseriesItem]) -> list[TimeseriesItem]:
+            out: list[TimeseriesItem] = []
             for d in ds:
                 if (d.to_datetime <= from_datetime) or (d.from_datetime >= to_datetime):
                     continue
@@ -86,8 +86,8 @@ class EM27MetadataInterface:
                 out.append(cropped_d)
             return out
 
-        def fill_ts_data_gaps_with_default(ds: list[T], default_item: T) -> list[T]:
-            out: list[T] = []
+        def fill_ts_data_gaps_with_default(ds: list[TimeseriesItem], default_item: TimeseriesItem) -> list[TimeseriesItem]:
+            out: list[TimeseriesItem] = []
 
             if len(ds) == 0:
                 new_element = default_item.model_copy()
@@ -152,14 +152,14 @@ class EM27MetadataInterface:
         # fill data gaps with default values
         utc_offsets = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_utc_offsets),
-            types.SensorTypes.DifferentUTCOffset(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentUTCOffset(**default_time_values),
         )
 
         # get all pressure data sources matching the time period
         # fill data gaps with default values
         pressure_data_sources = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_pressure_data_sources),
-            types.SensorTypes.DifferentPressureDataSource(
+            em27_metadata.types.SensorTypes.DifferentPressureDataSource(
                 **default_time_values, source=sensor.sensor_id
             ),
         )
@@ -168,14 +168,14 @@ class EM27MetadataInterface:
         # fill data gaps with default values
         pressure_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_pressure_calibration_factors),
-            types.SensorTypes.DifferentPressureCalibrationFactor(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor(**default_time_values),
         )
 
         # get all output calibration factors matching the time period
         # fill data gaps with default values
         output_calibration_factors = fill_ts_data_gaps_with_default(
             parse_ts_data(sensor.different_output_calibration_factors),
-            types.SensorTypes.DifferentOutputCalibrationFactor(**default_time_values),
+            em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor(**default_time_values),
         )
 
         # now we can assume that we have continuous `utc_offsets`, `pressure_data_sources`,
@@ -207,11 +207,11 @@ class EM27MetadataInterface:
                 )
             )
         )
-        sensor_data_contexts: list[types.SensorDataContext] = []
+        sensor_data_contexts: list[em27_metadata.types.SensorDataContext] = []
 
         for segment_from_datetime, segment_to_datetime in zip(breakpoints[:-1], breakpoints[1:]):
 
-            def _get_segment_property(property_list: list[T]) -> T:
+            def _get_segment_property(property_list: list[TimeseriesItem]) -> TimeseriesItem:
                 """raises IndexError if there is no property for the segment"""
                 candidates = list(
                     filter(
@@ -240,7 +240,7 @@ class EM27MetadataInterface:
                 raise AssertionError("This is a bug in the library")
 
             sensor_data_contexts.append(
-                types.SensorDataContext(
+                em27_metadata.types.SensorDataContext(
                     sensor_id=sensor.sensor_id,
                     serial_number=sensor.serial_number,
                     from_datetime=segment_from_datetime,
@@ -272,9 +272,9 @@ class _DatetimeSeriesItem(pydantic.BaseModel):
 
 
 def _test_data_integrity(
-    locations: list[types.LocationMetadata],
-    sensors: list[types.SensorMetadata],
-    campaigns: list[types.CampaignMetadata],
+    locations: list[em27_metadata.types.LocationMetadata],
+    sensors: list[em27_metadata.types.SensorMetadata],
+    campaigns: list[em27_metadata.types.CampaignMetadata],
 ) -> None:
     location_ids = [s.location_id for s in locations]
     sensor_ids = [s.sensor_id for s in sensors]

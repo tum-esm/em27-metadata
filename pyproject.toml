@@ -1,16 +1,13 @@
 [tool.poetry]
-name = "tum_esm_em27_metadata"
-version = "2.0.0-rc.12"
+name = "em27_metadata"
+version = "1.0.0-rc.1"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 readme = "README.md"
 authors = [
     "Moritz Makowski <moritz.makowski@tum.de>",
     "Marlon Mueller <marlon.mueller@tum.de>",
 ]
-packages = [
-    { include = "tum_esm_em27_metadata" },
-    { include = "tum_esm_em27_metadata/py.typed" },
-]
+packages = [{ include = "em27_metadata" }]
 repository = "https://github.com/tum-esm/em27-metadata"
 
 [tool.poetry.dependencies]
