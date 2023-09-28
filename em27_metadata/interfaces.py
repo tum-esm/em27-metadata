@@ -8,8 +8,7 @@ TimeseriesItem = TypeVar(
     em27_metadata.types.SensorTypes.Location,
     em27_metadata.types.SensorTypes.DifferentUTCOffset,
     em27_metadata.types.SensorTypes.DifferentPressureDataSource,
-    em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor,
-    em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor,
+    em27_metadata.types.SensorTypes.DifferentCalibrationFactors,
 )
 
 
@@ -169,18 +168,9 @@ class EM27MetadataInterface:
 
         # get all pressure calibration factors matching the time period
         # fill data gaps with default values
-        pressure_calibration_factors = fill_ts_data_gaps_with_default(
-            parse_ts_data(sensor.different_pressure_calibration_factors),
-            em27_metadata.types.SensorTypes.DifferentPressureCalibrationFactor(
-                **default_time_values
-            ),
-        )
-
-        # get all output calibration factors matching the time period
-        # fill data gaps with default values
-        output_calibration_factors = fill_ts_data_gaps_with_default(
-            parse_ts_data(sensor.different_output_calibration_factors),
-            em27_metadata.types.SensorTypes.DifferentOutputCalibrationFactor(
+        calibration_factors = fill_ts_data_gaps_with_default(
+            parse_ts_data(sensor.different_calibration_factors),
+            em27_metadata.types.SensorTypes.DifferentCalibrationFactors(
                 **default_time_values
             ),
         )
@@ -205,13 +195,8 @@ class EM27MetadataInterface:
                     *[uo.to_datetime for uo in utc_offsets],
                     *[pds.from_datetime for pds in pressure_data_sources],
                     *[pds.to_datetime for pds in pressure_data_sources],
-                    *[
-                        pcf.from_datetime
-                        for pcf in pressure_calibration_factors
-                    ],
-                    *[pcf.to_datetime for pcf in pressure_calibration_factors],
-                    *[ocf.from_datetime for ocf in output_calibration_factors],
-                    *[ocf.to_datetime for ocf in output_calibration_factors],
+                    *[cf.from_datetime for cf in calibration_factors],
+                    *[cf.to_datetime for cf in calibration_factors],
                 ])
             )
         )
@@ -244,8 +229,7 @@ class EM27MetadataInterface:
                 sl = _get_segment_property(sensor_locations)
                 uo = _get_segment_property(utc_offsets)
                 pds = _get_segment_property(pressure_data_sources)
-                pcf = _get_segment_property(pressure_calibration_factors)
-                ocf = _get_segment_property(output_calibration_factors)
+                cf = _get_segment_property(calibration_factors)
             except IndexError:
                 continue
 
@@ -268,11 +252,7 @@ class EM27MetadataInterface:
                     location=location,
                     utc_offset=uo.utc_offset,
                     pressure_data_source=pds.source,
-                    pressure_calibration_factor=pcf.factor,
-                    output_calibration_factors_xco2=ocf.factors_xco2,
-                    output_calibration_factors_xch4=ocf.factors_xch4,
-                    output_calibration_factors_xco=ocf.factors_xco,
-                    output_calibration_scheme=ocf.calibration_scheme,
+                    calibration_factors=cf,
                     multiple_ctx_on_this_date=False,
                 )
             )
@@ -285,7 +265,7 @@ class EM27MetadataInterface:
 
 
 class _DatetimeSeriesItem(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+    #model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     from_datetime: datetime.datetime
     to_datetime: datetime.datetime
@@ -333,11 +313,7 @@ def _test_data_integrity(
             ],
             [
                 _DatetimeSeriesItem(**l2.model_dump())
-                for l2 in s3.different_pressure_calibration_factors
-            ],
-            [
-                _DatetimeSeriesItem(**l2.model_dump())
-                for l2 in s3.different_output_calibration_factors
+                for l2 in s3.different_calibration_factors
             ],
         ]:
             for _item in timeseries:

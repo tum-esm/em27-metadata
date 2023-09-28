@@ -16,21 +16,23 @@
         "source": "LMU-MIM01-height-adjusted"
       }
     ],
-    "different_pressure_calibration_factors": [
+    "different_calibration_factors": [
       {
         "from_datetime": "2020-08-26T00:00:00+00:00",
         "to_datetime": "2020-10-01T23:59:59+00:00",
-        "factor": 1.001
-      }
-    ],
-    "different_output_calibration_factors": [
-      {
-        "from_datetime": "2020-08-26T00:00:00+00:00",
-        "to_datetime": "2020-10-01T23:59:59+00:00",
-        "factors_xco2": [1.001, 0],
-        "factors_xch4": [1.002, 0],
-        "factors_xco": [1.003, 0],
-        "calibration_scheme": "Ohyama2021"
+        "pressure": 1.001,
+        "xco2": {
+          "factors": [1.001, 0.0007],
+          "scheme": "Ohyama2021"
+        },
+        "xch4": {
+          "factors": [1.002, 0.0008],
+          "scheme": "Ohyama2021"
+        },
+        "xco": {
+          "factors": [1.003, 0.0009],
+          "scheme": "Ohyama2021"
+        }
       }
     ],
     "locations": [
@@ -49,10 +51,6 @@
   {
     "sensor_id": "sid2",
     "serial_number": 51,
-    "different_utc_offsets": [],
-    "different_pressure_data_sources": [],
-    "different_pressure_calibration_factors": [],
-    "different_output_calibration_factors": [],
     "locations": [
       {
         "from_datetime": "2020-08-26T00:00:00+00:00",

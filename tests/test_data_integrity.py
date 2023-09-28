@@ -15,17 +15,20 @@ DATA_DIR = os.path.join(
 def test_data_integrity() -> None:
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
         locations = [
-            em27_metadata.types.LocationMetadata(**l) for l in json.load(f)
+            em27_metadata.types.LocationMetadata.model_validate(l)
+            for l in json.load(f)
         ]
 
     with open(os.path.join(DATA_DIR, "sensors.json")) as f:
         sensors = [
-            em27_metadata.types.SensorMetadata(**l) for l in json.load(f)
+            em27_metadata.types.SensorMetadata.model_validate(l)
+            for l in json.load(f)
         ]
 
     with open(os.path.join(DATA_DIR, "campaigns.json")) as f:
         campaigns = [
-            em27_metadata.types.CampaignMetadata(**l) for l in json.load(f)
+            em27_metadata.types.CampaignMetadata.model_validate(l)
+            for l in json.load(f)
         ]
 
     location_data = em27_metadata.interfaces.EM27MetadataInterface(
@@ -76,80 +79,101 @@ def test_getter_function() -> None:
         ),
     ]
     sensors = [
-        em27_metadata.types.SensorMetadata(
-            **{
-                "sensor_id":
-                    "sid1",
-                "serial_number":
-                    51,
-                "different_utc_offsets": [
-                    {
-                        "from_datetime": "2020-02-01T02:00:00+00:00",
-                        "to_datetime": "2020-02-01T15:59:59+00:00",
-                        "utc_offset": 1,
+        em27_metadata.types.SensorMetadata.model_validate({
+            "sensor_id":
+                "sid1",
+            "serial_number":
+                51,
+            "different_utc_offsets": [
+                {
+                    "from_datetime": "2020-02-01T02:00:00+00:00",
+                    "to_datetime": "2020-02-01T15:59:59+00:00",
+                    "utc_offset": 1,
+                },
+                {
+                    "from_datetime": "2020-02-01T16:00:00+00:00",
+                    "to_datetime": "2020-02-01T21:59:59+00:00",
+                    "utc_offset": 2,
+                },
+            ],
+            "different_pressure_data_sources": [
+                {
+                    "from_datetime": "2020-02-01T02:00:00+00:00",
+                    "to_datetime": "2020-02-01T14:59:59+00:00",
+                    "source": "src1",
+                },
+                {
+                    "from_datetime": "2020-02-01T15:00:00+00:00",
+                    "to_datetime": "2020-02-01T21:59:59+00:00",
+                    "source": "src2",
+                },
+            ],
+            "different_calibration_factors": [
+                {
+                    "from_datetime": "2020-02-01T02:00:00+00:00",
+                    "to_datetime": "2020-02-01T12:59:59+00:00",
+                    "pressure": 1.001,
+                    "xco2": {
+                        "factors": [1.001, 0],
+                        "scheme": "Ohyama2021",
                     },
-                    {
-                        "from_datetime": "2020-02-01T16:00:00+00:00",
-                        "to_datetime": "2020-02-01T21:59:59+00:00",
-                        "utc_offset": 2,
+                    "xch4": {
+                        "factors": [1.002, 0],
+                        "scheme": "Ohyama2021",
                     },
-                ],
-                "different_pressure_data_sources": [
-                    {
-                        "from_datetime": "2020-02-01T02:00:00+00:00",
-                        "to_datetime": "2020-02-01T14:59:59+00:00",
-                        "source": "src1",
+                    "xco": {
+                        "factors": [1.003, 0],
+                        "scheme": "Ohyama2021",
                     },
-                    {
-                        "from_datetime": "2020-02-01T15:00:00+00:00",
-                        "to_datetime": "2020-02-01T21:59:59+00:00",
-                        "source": "src2",
+                },
+                {
+                    "from_datetime": "2020-02-01T13:00:00+00:00",
+                    "to_datetime": "2020-02-01T13:59:59+00:00",
+                    "pressure": 1.001,
+                    "xco2": {
+                        "factors": [1.004, 0],
+                        "scheme": "Ohyama2021",
                     },
-                ],
-                "different_pressure_calibration_factors": [
-                    {
-                        "from_datetime": "2020-02-01T02:00:00+00:00",
-                        "to_datetime": "2020-02-01T13:59:59+00:00",
-                        "factor": 1.001,
+                    "xch4": {
+                        "factors": [1.005, 0],
+                        "scheme": "Ohyama2021",
                     },
-                    {
-                        "from_datetime": "2020-02-01T14:00:00+00:00",
-                        "to_datetime": "2020-02-01T21:59:59+00:00",
-                        "factor": 1.002,
+                    "xco": {
+                        "factors": [1.006, 0],
+                        "scheme": "Ohyama2021",
                     },
-                ],
-                "different_output_calibration_factors": [
-                    {
-                        "from_datetime": "2020-02-01T02:00:00+00:00",
-                        "to_datetime": "2020-02-01T12:59:59+00:00",
-                        "factors_xco2": [1.001, 0],
-                        "factors_xch4": [1.002, 0],
-                        "factors_xco": [1.003, 0],
-                        "calibration_scheme": "Ohyama2021",
+                },
+                {
+                    "from_datetime": "2020-02-01T14:00:00+00:00",
+                    "to_datetime": "2020-02-01T21:59:59+00:00",
+                    "pressure": 1.002,
+                    "xco2": {
+                        "factors": [1.004, 0],
+                        "scheme": "Ohyama2021",
                     },
-                    {
-                        "from_datetime": "2020-02-01T13:00:00+00:00",
-                        "to_datetime": "2020-02-01T21:59:59+00:00",
-                        "factors_xco2": [1.004, 0],
-                        "factors_xch4": [1.005, 0],
-                        "factors_xco": [1.006, 0],
-                        "calibration_scheme": "Ohyama2021",
+                    "xch4": {
+                        "factors": [1.005, 0],
+                        "scheme": "Ohyama2021",
                     },
-                ],
-                "locations": [
-                    {
-                        "from_datetime": "2020-02-01T01:00:00+00:00",
-                        "to_datetime": "2020-02-01T09:59:59+00:00",
-                        "location_id": "lid1",
+                    "xco": {
+                        "factors": [1.006, 0],
+                        "scheme": "Ohyama2021",
                     },
-                    {
-                        "from_datetime": "2020-02-01T12:00:00+00:00",
-                        "to_datetime": "2020-02-01T22:59:59+00:00",
-                        "location_id": "lid2",
-                    },
-                ],
-            }
-        ),
+                },
+            ],
+            "locations": [
+                {
+                    "from_datetime": "2020-02-01T01:00:00+00:00",
+                    "to_datetime": "2020-02-01T09:59:59+00:00",
+                    "location_id": "lid1",
+                },
+                {
+                    "from_datetime": "2020-02-01T12:00:00+00:00",
+                    "to_datetime": "2020-02-01T22:59:59+00:00",
+                    "location_id": "lid2",
+                },
+            ],
+        }),
     ]
 
     location_data = em27_metadata.interfaces.EM27MetadataInterface(
@@ -197,16 +221,17 @@ def test_getter_function() -> None:
     ]
 
     pressure_calibration_factors = [
-        c.pressure_calibration_factor for c in chunks
+        c.calibration_factors.pressure for c in chunks
     ]
     assert pressure_calibration_factors == [
         1.0, 1.001, 1.001, 1.001, 1.002, 1.002, 1.002, 1.0
     ]
 
-    output_calibration_factors = [
-        c.output_calibration_factors_xco2[0] for c in chunks
-    ]
-    assert output_calibration_factors == [
+    xco2_calibration_factors = [(
+        None if (c.calibration_factors.xco2 is None) else
+        c.calibration_factors.xco2.factors[0]
+    ) for c in chunks]
+    assert xco2_calibration_factors == [
         1, 1.001, 1.001, 1.004, 1.004, 1.004, 1.004, 1
     ]
 
