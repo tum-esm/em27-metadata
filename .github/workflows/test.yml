@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.action_repository }}
           GITHUB_ACCESS_TOKEN: ${{ github.token }}
-        run: .venv/bin/python -m pytest tests/ -m "ci"
+        run: .venv/bin/python -m pytest tests/ -m "library"
 
       - name: Check whether code formatting is correct
         run: |

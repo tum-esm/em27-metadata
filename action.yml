@@ -2,57 +2,57 @@ name: "Test EM27 Metadata Storage"
 author: "Moritz Makowski <moritz.makowski@tum.de>"
 description: "Test the integrity of a repository containing EM27 metadata"
 runs:
-    using: "composite"
-    steps:
-        # check-out repo and set-up python
-        - name: Check out repository
-          uses: actions/checkout@v3
-        - name: Set up Python 3.9.16
-          uses: actions/setup-python@v4
-          with:
-              python-version: "3.9.16"
+  using: "composite"
+  steps:
+    # check-out repo and set-up python
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Set up Python 3.11.5
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11.5"
 
-        # move all library files into working directory; this makes
-        # testing easier whebecausen we don't have to worry about
-        # different paths for the repo and the action. Copying the
-        # README.md is required for the poetry install command
-        - name: Copy action files
-          run: |
-              cp -r ${{ github.action_path }}/tests .
-              cp -r ${{ github.action_path }}/em27_metadata .
-              cp ${{ github.action_path }}/pyproject.toml .
-              cp ${{ github.action_path }}/poetry.lock .
-              cp ${{ github.action_path }}/README.md .
-          shell: bash
+    # move all library files into working directory; this makes
+    # testing easier whebecausen we don't have to worry about
+    # different paths for the repo and the action. Copying the
+    # README.md is required for the poetry install command
+    - name: Copy action files
+      run: |
+        cp -r ${{ github.action_path }}/tests .
+        cp -r ${{ github.action_path }}/em27_metadata .
+        cp ${{ github.action_path }}/pyproject.toml .
+        cp ${{ github.action_path }}/poetry.lock .
+        cp ${{ github.action_path }}/README.md .
+      shell: bash
 
-        # try to load cached venv
-        - name: Load cached venv
-          id: cached-poetry-dependencies
-          uses: actions/cache@v3
-          with:
-              path: .venv
-              key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('poetry.lock') }}
+    # try to load cached venv
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-3.11.5-${{ hashFiles('poetry.lock') }}
 
-        # install & configure poetry if cache does not exist
-        - name: Install Poetry
-          if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-          uses: snok/install-poetry@v1
-          with:
-              version: 1.6.1
-              virtualenvs-create: true
-              virtualenvs-in-project: true
-              installer-parallel: true
+    # install & configure poetry if cache does not exist
+    - name: Install Poetry
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.6.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
 
-        # install dependencies if cache does not exist
-        - name: Install dependencies
-          if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-          run: poetry install --with=dev
-          shell: bash
+    # install dependencies if cache does not exist
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --with=dev
+      shell: bash
 
-        # run tests
-        - name: Run pytests
-          env:
-              GITHUB_REPOSITORY: ${{ github.action_repository }}
-              GITHUB_ACCESS_TOKEN: ${{ github.token }}
-          run: .venv/bin/python -m pytest tests/ -m "action"
-          shell: bash
+    # run tests
+    - name: Run pytests
+      env:
+        GITHUB_REPOSITORY: ${{ github.action_repository }}
+        GITHUB_ACCESS_TOKEN: ${{ github.token }}
+      run: .venv/bin/python -m pytest tests/ -m "action"
+      shell: bash

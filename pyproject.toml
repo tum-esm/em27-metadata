@@ -41,9 +41,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 markers = [
-    "ci: run in GitHub CI",
+    "library: test the library in GitHub's CI or locally",
     "action: run when using this repo as a GitHub Action",
-    "local: run locally",
 ]
 
 [tool.yapf]

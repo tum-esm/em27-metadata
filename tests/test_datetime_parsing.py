@@ -2,8 +2,7 @@ import pytest
 import em27_metadata
 
 
-@pytest.mark.ci
-@pytest.mark.local
+@pytest.mark.library
 def test_datetime_parsing() -> None:
     assert em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
         "2016-10-01T00:00:00+00:00"
@@ -19,8 +18,7 @@ def test_datetime_parsing() -> None:
     )
 
 
-@pytest.mark.ci
-@pytest.mark.local
+@pytest.mark.library
 def test_time_series_element() -> None:
     tse1 = em27_metadata.types.TimeSeriesElement(
         from_datetime="2016-10-01T00:00:00+00:00",

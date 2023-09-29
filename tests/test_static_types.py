@@ -2,8 +2,7 @@ import os
 import pytest
 
 
-@pytest.mark.ci
-@pytest.mark.local
+@pytest.mark.library
 def test_static_types() -> None:
     print("removing old mypy cache")
     r1 = os.system("rm -rf .mypy_cache")
