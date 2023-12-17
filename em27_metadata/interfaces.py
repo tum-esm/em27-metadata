@@ -287,9 +287,17 @@ class EM27MetadataInterface:
                 )
             )
 
-        if len(sensor_data_contexts) > 1:
-            for ctx in sensor_data_contexts:
-                ctx.multiple_ctx_on_this_date = True
+        for ctx_index, ctx in enumerate(sensor_data_contexts):
+            if ctx_index > 0:
+                prev_ctx = sensor_data_contexts[ctx_index - 1]
+                if prev_ctx.to_datetime.date() == ctx.from_datetime.date():
+                    ctx.multiple_ctx_on_this_date = True
+                    continue
+            if ctx_index < len(sensor_data_contexts) - 1:
+                next_ctx = sensor_data_contexts[ctx_index + 1]
+                if next_ctx.from_datetime.date() == ctx.to_datetime.date():
+                    ctx.multiple_ctx_on_this_date = True
+                    continue
 
         return sensor_data_contexts
 
