@@ -79,7 +79,7 @@ class CalibrationFactors(pydantic.BaseModel):
     )
 
 
-class Setup(TimeSeriesElement):
+class Setup(pydantic.BaseModel):
     location_id: str = pydantic.Field(
         ...,
         min_length=1,
@@ -101,12 +101,12 @@ class Setup(TimeSeriesElement):
     )
 
 
-class _CalibrationFactorsListItem(TimeSeriesElement):
+class CalibrationFactorsListItem(TimeSeriesElement):
     """An element in the `sensor.calibration_factors` list"""
     value: CalibrationFactors
 
 
-class _SetupsListItem(TimeSeriesElement):
+class SetupsListItem(TimeSeriesElement):
     """An element in the `sensor.setups` list"""
     value: Setup
 
@@ -167,8 +167,8 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    setups: List[_SetupsListItem] = pydantic.Field(..., min_length=0)
-    calibration_factors: List[_CalibrationFactorsListItem] = pydantic.Field(
+    setups: List[SetupsListItem] = pydantic.Field(..., min_length=0)
+    calibration_factors: List[CalibrationFactorsListItem] = pydantic.Field(
         [],
         description=(
             "List of calibration factors to used. Only required if the" +
@@ -225,7 +225,7 @@ class CampaignMetadata(TimeSeriesElement):
 
 
 class CampaignMetadataList(pydantic.RootModel[List[CampaignMetadata]]):
-    root: List[CampaignMetadata]
+    root: List[CampaignMetadata] = []
 
     @property
     def campaign_ids(self: CampaignMetadataList) -> List[str]:

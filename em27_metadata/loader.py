@@ -116,7 +116,7 @@ def load_from_local_files(
             f.read()
         )
 
-    campaigns: List[em27_metadata.types.CampaignMetadata] = []
+    campaigns = em27_metadata.types.CampaignMetadataList()
     if campaigns_path is not None:
         with open(campaigns_path) as f:
             campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(

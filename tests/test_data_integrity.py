@@ -13,17 +13,17 @@ DATA_DIR = os.path.join(
 @pytest.mark.action
 def test_data_integrity() -> None:
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
-        locations = em27_metadata.types.LocationMetadata.model_validate_json(
+        locations = em27_metadata.types.LocationMetadataList.model_validate_json(
             f.read()
         )
 
     with open(os.path.join(DATA_DIR, "sensors.json")) as f:
-        sensors = em27_metadata.types.SensorMetadata.model_validate_json(
+        sensors = em27_metadata.types.SensorMetadataList.model_validate_json(
             f.read()
         )
 
     with open(os.path.join(DATA_DIR, "campaigns.json")) as f:
-        campaigns = em27_metadata.types.CampaignMetadata.model_validate_json(
+        campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(
             f.read()
         )
 

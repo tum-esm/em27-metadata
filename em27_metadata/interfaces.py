@@ -8,7 +8,7 @@ class EM27MetadataInterface:
         self,
         locations: em27_metadata.types.LocationMetadataList,
         sensors: em27_metadata.types.SensorMetadataList,
-        campaigns: em27_metadata.types.CampaignMetadataList = [],
+        campaigns: em27_metadata.types.CampaignMetadataList,
     ):
         """Create a new EM27MetadataInterface object.
 
@@ -44,7 +44,7 @@ class EM27MetadataInterface:
         # reference existence in sensors.json
         for s1 in sensors.root:
             for l1 in s1.setups:
-                assert l1.value.location_id in locations.location_ids, f"unknown location id {l1.location_id}"
+                assert l1.value.location_id in locations.location_ids, f"unknown location id {l1.value.location_id}"
 
         # reference existence in campaigns.json
         for c1 in campaigns.root:
@@ -80,7 +80,7 @@ class EM27MetadataInterface:
 
         try:
             sensor = next(
-                filter(lambda s: s.sensor_id == sensor_id, self.sensors)
+                filter(lambda s: s.sensor_id == sensor_id, self.sensors.root)
             )
         except StopIteration:
             raise ValueError(f"Unknown sensor_id {sensor_id}")
@@ -90,11 +90,11 @@ class EM27MetadataInterface:
                 f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
             )
 
-        breakpoints: list[datetime.datetime] = sorted([
+        breakpoints: List[datetime.datetime] = sorted([
             dt for dt in set([
                 from_datetime,
-                *[_l.from_datetime for _l in sensor.locations],
-                *[_l.to_datetime for _l in sensor.locations],
+                *[_l.from_datetime for _l in sensor.setups],
+                *[_l.to_datetime for _l in sensor.setups],
                 *[_c.from_datetime for _c in sensor.calibration_factors],
                 *[_c.to_datetime for _c in sensor.calibration_factors],
                 to_datetime,
@@ -113,7 +113,7 @@ class EM27MetadataInterface:
                 location = next(
                     filter(
                         lambda l: l.location_id == setup.location_id,
-                        self.locations,
+                        self.locations.root,
                     )
                 )
             except StopIteration:
@@ -124,7 +124,7 @@ class EM27MetadataInterface:
                         lambda c: c.from_datetime <= from_dt <= c.to_datetime,
                         sensor.calibration_factors,
                     )
-                )
+                ).value
             except StopIteration:
                 # just use the default with all ones
                 calibration_factor = em27_metadata.types.CalibrationFactors()
