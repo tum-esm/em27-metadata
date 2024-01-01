@@ -1,6 +1,5 @@
 from typing import List
 import datetime
-import pydantic
 import em27_metadata
 
 
@@ -41,7 +40,18 @@ class EM27MetadataInterface:
         self.locations = locations
         self.sensors = sensors
         self.campaigns = campaigns
-        _test_data_integrity(self.locations, self.sensors, self.campaigns)
+
+        # reference existence in sensors.json
+        for s1 in sensors.root:
+            for l1 in s1.setups:
+                assert l1.value.location_id in locations.location_ids, f"unknown location id {l1.location_id}"
+
+        # reference existence in campaigns.json
+        for c1 in campaigns.root:
+            for _sid in c1.sensor_ids:
+                assert _sid in sensors.sensor_ids, f"unknown sensor id {_sid}"
+            for _lid in c1.location_ids:
+                assert _lid in locations.location_ids, f"unknown location id {_lid}"
 
     def get(
         self,
@@ -133,53 +143,3 @@ class EM27MetadataInterface:
             )
 
         return sensor_data_contexts
-
-
-class _DatetimeSeriesItem(pydantic.BaseModel):
-    from_datetime: datetime.datetime
-    to_datetime: datetime.datetime
-
-
-def _test_data_integrity(
-    locations: em27_metadata.types.LocationMetadataList,
-    sensors: em27_metadata.types.SensorMetadataList,
-    campaigns: em27_metadata.types.CampaignMetadataList,
-) -> None:
-    """This function tests the integrity of the metadata.
-    
-    See the `EM27MetadataInterface` constructor for details."""
-
-    # reference existence in sensors.json
-    for s1 in sensors.root:
-        for l1 in s1.setups:
-            assert l1.value.location_id in locations.location_ids, f"unknown location id {l1.location_id}"
-
-    # reference existence in campaigns.json
-    for c1 in campaigns.root:
-        for _sid in c1.sensor_ids:
-            assert _sid in sensors.sensor_ids, f"unknown sensor id {_sid}"
-        for _lid in c1.location_ids:
-            assert _lid in locations.location_ids, f"unknown location id {_lid}"
-
-    # integrity of time series in sensors.json
-    # TODO: move that to root model validators
-    for s3 in sensors:
-        for timeseries in [
-            [_DatetimeSeriesItem(**l2.model_dump()) for l2 in s3.locations],
-            [
-                _DatetimeSeriesItem(**l2.model_dump())
-                for l2 in s3.different_utc_offsets
-            ],
-            [
-                _DatetimeSeriesItem(**l2.model_dump())
-                for l2 in s3.different_pressure_data_sources
-            ],
-            [
-                _DatetimeSeriesItem(**l2.model_dump())
-                for l2 in s3.different_calibration_factors
-            ],
-        ]:
-            for _item_1, _item_2 in zip(timeseries[:-1], timeseries[1 :]):
-                assert (
-                    _item_1.to_datetime < _item_2.from_datetime
-                ), f"time periods are overlapping or not sorted: {_item_1.model_dump()}, {_item_2.model_dump()}"

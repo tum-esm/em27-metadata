@@ -19,7 +19,7 @@ class TimeSeriesElement(pydantic.BaseModel):
             return v
         assert isinstance(v, str), "must be a string"
         assert re.match(
-            r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$",
+            r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{4})$",
             v
         ) is not None, "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
         return datetime.datetime.fromisoformat(v)
@@ -161,9 +161,7 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    # TODO: use root model and validate uniqueness and shit there
     setups: List[_SetupsListItem] = pydantic.Field(..., min_length=0)
-    # TODO: use root model and validate uniqueness and shit there
     calibration_factors: List[_CalibrationFactorsListItem] = pydantic.Field(
         [],
         description=(
@@ -173,6 +171,22 @@ class SensorMetadata(pydantic.BaseModel):
             " to the results produced by Proffast/GFIT."
         ),
     )
+
+    @pydantic.model_validator(mode="after")
+    def check_timeseries_integrity(self: SensorMetadata) -> SensorMetadata:
+        for s1, s2 in zip(self.setups[:-1], self.setups[1 :]):
+            if s2.from_datetime <= s1.to_datetime:
+                raise ValueError(
+                    "Setups timeseries are overlapping or unsorted"
+                )
+        for c1, c2 in zip(
+            self.calibration_factors[:-1], self.calibration_factors[1 :]
+        ):
+            if c2.from_datetime <= c1.to_datetime:
+                raise ValueError(
+                    "Calibration Factors timeseries are overlapping or unsorted"
+                )
+        return self
 
 
 class SensorMetadataList(pydantic.RootModel[List[SensorMetadata]]):
@@ -232,4 +246,4 @@ class SensorDataContext(pydantic.BaseModel):
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
     def t_serializer(self, dt: datetime.date, _info: Any) -> str:
-        return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        return dt.strftime("%Y-%m-%dT%H:%M:%S%z")
