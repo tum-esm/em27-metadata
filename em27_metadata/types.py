@@ -12,17 +12,22 @@ class TimeSeriesElement(pydantic.BaseModel):
     to_datetime: datetime.datetime
 
     @pydantic.field_validator("from_datetime", "to_datetime", mode="before")
-    def name_must_contain_space(cls, v: str) -> datetime.datetime:
+    def datetime_string_validator(
+        cls, v: str | datetime.datetime
+    ) -> datetime.datetime:
+        if isinstance(v, datetime.datetime):
+            return v
         assert isinstance(v, str), "must be a string"
-        assert TimeSeriesElement.matches_datetime_regex(
+        assert re.match(
+            r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$",
             v
-        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
+        ) is not None, "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
         return datetime.datetime.fromisoformat(v)
 
-    @staticmethod
-    def matches_datetime_regex(s: str) -> bool:
-        datetime_regex = r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{2}):(\d{2})$"
-        return re.match(datetime_regex, s) is not None
+    @pydantic.model_validator(mode="after")
+    def model_validator(self) -> TimeSeriesElement:
+        assert self.from_datetime < self.to_datetime, "from_datetime must be before to_datetime"
+        return self
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
     def t_serializer(self, dt: datetime.date, _info: Any) -> str:
@@ -117,6 +122,8 @@ class LocationMetadata(pydantic.BaseModel):
     alt: float = pydantic.Field(..., ge=-20, le=10000)
 
 
+# TODO: use rootmodel
+# TODO: validate uniqueness and shit here
 class LocationMetadataList(pydantic.BaseModel):
     locations: List[LocationMetadata]
 
@@ -160,6 +167,8 @@ class SensorMetadata(pydantic.BaseModel):
     )
 
 
+# TODO: use rootmodel
+# TODO: validate uniqueness and shit here
 class SensorMetadataList(pydantic.BaseModel):
     sensors: List[SensorMetadata]
 
@@ -179,6 +188,8 @@ class CampaignMetadata(TimeSeriesElement):
     location_ids: List[str]
 
 
+# TODO: use rootmodel
+# TODO: validate uniqueness and shit here
 class CampaignMetadataList(pydantic.BaseModel):
     campaigns: List[CampaignMetadata]
 
