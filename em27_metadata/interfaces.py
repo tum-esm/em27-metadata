@@ -40,7 +40,9 @@ class EM27MetadataInterface:
 
         self.locations = locations
         self.sensors = sensors
-        self.campaigns = campaigns
+        self.campaigns = em27_metadata.types.CampaignMetadataList(
+            root=campaigns
+        )
 
         self.location_ids = [s.location_id for s in self.locations]
         self.sensor_ids = [s.sensor_id for s in self.sensors]
@@ -156,15 +158,12 @@ def _test_data_integrity(
 
     location_ids = [s.location_id for s in locations]
     sensor_ids = [s.sensor_id for s in sensors]
-    campaign_ids = [s.campaign_id for s in campaigns]
 
     # unique ids
     # TODO: move that to root model validators
     assert len(set(location_ids)
               ) == len(location_ids), "location ids are not unique"
     assert len(set(sensor_ids)) == len(sensor_ids), "sensor ids are not unique"
-    assert len(set(campaign_ids)
-              ) == len(campaign_ids), "campaign ids are not unique"
 
     # reference existence in sensors.json
     for s1 in sensors:

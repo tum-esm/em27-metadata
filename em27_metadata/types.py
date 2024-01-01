@@ -188,10 +188,15 @@ class CampaignMetadata(TimeSeriesElement):
     location_ids: List[str]
 
 
-# TODO: use rootmodel
-# TODO: validate uniqueness and shit here
-class CampaignMetadataList(pydantic.BaseModel):
-    campaigns: List[CampaignMetadata]
+class CampaignMetadataList(pydantic.RootModel[List[CampaignMetadata]]):
+    root: List[CampaignMetadata]
+
+    @pydantic.model_validator(mode="after")
+    def check_id_uniqueness(self: CampaignMetadataList) -> CampaignMetadataList:
+        campaign_ids = [_c.campaign_id for _c in self.root]
+        if len(campaign_ids) > len(set(campaign_ids)):
+            raise ValueError("Campaign IDs should be unique")
+        return self
 
 
 class SensorDataContext(pydantic.BaseModel):
