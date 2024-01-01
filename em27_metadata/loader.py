@@ -61,26 +61,26 @@ def load_from_github(
 
     return em27_metadata.interfaces.EM27MetadataInterface(
         locations=em27_metadata.types.LocationMetadataList.model_validate_json(
-            '{"locations": ' + _request_github_file(
+            _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/locations.json",
                 access_token=access_token,
-            ) + "}"
-        ).locations,
+            )
+        ),
         sensors=em27_metadata.types.SensorMetadataList.model_validate_json(
-            '{"sensors": ' + _request_github_file(
+            _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/sensors.json",
                 access_token=access_token,
-            ) + "}"
-        ).sensors,
+            )
+        ),
         campaigns=em27_metadata.types.CampaignMetadataList.model_validate_json(
-            '{"campaigns": ' + _request_github_file(
+            _request_github_file(
                 github_repository=github_repository,
                 filepath=f"data/campaigns.json",
                 access_token=access_token,
-            ) + "}"
-        ).campaigns,
+            )
+        ),
     )
 
 
@@ -109,19 +109,19 @@ def load_from_local_files(
     with open(locations_path) as f:
         locations = em27_metadata.types.LocationMetadataList.model_validate_json(
             f.read()
-        ).locations
+        )
 
     with open(sensors_path) as f:
         sensors = em27_metadata.types.SensorMetadataList.model_validate_json(
             f.read()
-        ).sensors
+        )
 
     campaigns: List[em27_metadata.types.CampaignMetadata] = []
     if campaigns_path is not None:
         with open(campaigns_path) as f:
             campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(
                 f.read()
-            ).campaigns
+            )
 
     return em27_metadata.interfaces.EM27MetadataInterface(
         locations=locations, sensors=sensors, campaigns=campaigns
