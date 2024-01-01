@@ -29,7 +29,7 @@ class TimeSeriesElement(pydantic.BaseModel):
         return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 
-class CalibrationFactorsItem(pydantic.BaseModel):
+class GasSpecificCalibrationFactors(pydantic.BaseModel):
     factors: List[float] = pydantic.Field(
         [1],
         description=
@@ -54,30 +54,50 @@ class CalibrationFactors(pydantic.BaseModel):
         factor (see Ohyama 2021)."""
 
     pressure: float = pydantic.Field(
-        1, description="Pressure calibration factor. real = measured * factor"
+        1,
+        description="Pressure calibration factor. estimate = measured * factor",
     )
-    xco2: CalibrationFactorsItem = pydantic.Field(CalibrationFactorsItem())
-    xch4: CalibrationFactorsItem = pydantic.Field(CalibrationFactorsItem())
-    xco: CalibrationFactorsItem = pydantic.Field(CalibrationFactorsItem())
+    xco2: GasSpecificCalibrationFactors = pydantic.Field(
+        GasSpecificCalibrationFactors()
+    )
+    xch4: GasSpecificCalibrationFactors = pydantic.Field(
+        GasSpecificCalibrationFactors()
+    )
+    xco: GasSpecificCalibrationFactors = pydantic.Field(
+        GasSpecificCalibrationFactors()
+    )
 
 
-class SensorTypes:
-    class DifferentUTCOffset(TimeSeriesElement):
-        utc_offset: float = pydantic.Field(0, gt=-12, lt=12)
+class Setup(TimeSeriesElement):
+    location_id: str = pydantic.Field(
+        ...,
+        min_length=1,
+        description=
+        "Location ID referring to a location named in `locations.json`",
+    )
+    pressure_data_source: Optional[str] = pydantic.Field(
+        None,
+        min_length=1,
+        description=
+        "Pressure data source, if not set, using the pressure of the sensor",
+    )
+    utc_offset: float = pydantic.Field(
+        0,
+        gt=-12,
+        lt=12,
+        description=
+        "UTC offset of the location, if not set, using an offset of 0",
+    )
 
-    class DifferentPressureDataSource(TimeSeriesElement):
-        source: str = pydantic.Field(..., min_length=1)
 
-    class DifferentCalibrationFactors(TimeSeriesElement, CalibrationFactors):
-        """The same as `CalibrationFactors` but with a time window."""
+class _CalibrationFactorsListItem(TimeSeriesElement):
+    """An element in the `sensor.calibration_factors` list"""
+    value: CalibrationFactors
 
-    class Location(TimeSeriesElement):
-        location_id: str = pydantic.Field(
-            ...,
-            min_length=1,
-            description=
-            "Location ID referring to a location named in `locations.json`",
-        )
+
+class _SetupsListItem(TimeSeriesElement):
+    """An element in the `sensor.setups` list"""
+    value: Setup
 
 
 class LocationMetadata(pydantic.BaseModel):
@@ -111,7 +131,6 @@ class SensorMetadata(pydantic.BaseModel):
     no calibration of pressure or output values)."""
 
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
-
     sensor_id: str = pydantic.Field(
         ...,
         min_length=1,
@@ -127,34 +146,16 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    locations: List[SensorTypes.Location] = pydantic.Field(..., min_length=0)
-    different_utc_offsets: List[
-        SensorTypes.DifferentUTCOffset] = pydantic.Field(
-            [],
-            min_length=0,
-            description=(
-                "List of UTC offsets in which the sensor has recorded " +
-                "data. Only required if the UTC offset is non zero."
-            ),
-        )
-    different_pressure_data_sources: List[
-        SensorTypes.DifferentPressureDataSource] = pydantic.Field(
-            [],
-            min_length=0,
-            description=(
-                "List of pressure data sources. Only required if the data" +
-                " source is the stations built-in pressure sensor."
-            ),
-        )
-    different_calibration_factors: List[
-        SensorTypes.DifferentCalibrationFactors
-    ] = pydantic.Field(
+    # TODO: use root model and validate uniqueness and shit there
+    setups: List[_SetupsListItem] = pydantic.Field(..., min_length=0)
+    # TODO: use root model and validate uniqueness and shit there
+    calibration_factors: List[_CalibrationFactorsListItem] = pydantic.Field(
         [],
         description=(
             "List of calibration factors to used. Only required if the" +
             "calibration factor is not 1.0. The pressure calibration factor" +
             " is applied before the retrieval, the other factors are applied" +
-            " to the results delivered by Proffast/GFIT."
+            " to the results produced by Proffast/GFIT."
         ),
     )
 
