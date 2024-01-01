@@ -167,10 +167,15 @@ class SensorMetadata(pydantic.BaseModel):
     )
 
 
-# TODO: use rootmodel
-# TODO: validate uniqueness and shit here
-class SensorMetadataList(pydantic.BaseModel):
-    sensors: List[SensorMetadata]
+class SensorMetadataList(pydantic.RootModel[List[SensorMetadata]]):
+    root: List[SensorMetadata]
+
+    @pydantic.model_validator(mode="after")
+    def check_id_uniqueness(self: SensorMetadataList) -> SensorMetadataList:
+        sensor_ids = [_s.sensor_id for _s in self.root]
+        if len(sensor_ids) > len(set(sensor_ids)):
+            raise ValueError("Sensr IDs should be unique")
+        return self
 
 
 class CampaignMetadata(TimeSeriesElement):

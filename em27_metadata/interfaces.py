@@ -39,7 +39,7 @@ class EM27MetadataInterface:
         """
 
         self.locations = locations
-        self.sensors = sensors
+        self.sensors = em27_metadata.types.SensorMetadataList(root=sensors)
         self.campaigns = em27_metadata.types.CampaignMetadataList(
             root=campaigns
         )
@@ -163,7 +163,6 @@ def _test_data_integrity(
     # TODO: move that to root model validators
     assert len(set(location_ids)
               ) == len(location_ids), "location ids are not unique"
-    assert len(set(sensor_ids)) == len(sensor_ids), "sensor ids are not unique"
 
     # reference existence in sensors.json
     for s1 in sensors:
@@ -195,11 +194,6 @@ def _test_data_integrity(
                 for l2 in s3.different_calibration_factors
             ],
         ]:
-            for _item in timeseries:
-                assert (
-                    _item.from_datetime < _item.to_datetime
-                ), f"from_datetime ({_item.from_datetime}) has to less equal to_datetime ({_item.to_datetime})"
-
             for _item_1, _item_2 in zip(timeseries[:-1], timeseries[1 :]):
                 assert (
                     _item_1.to_datetime < _item_2.from_datetime
