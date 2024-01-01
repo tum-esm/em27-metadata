@@ -18,11 +18,17 @@ class TimeSeriesElement(pydantic.BaseModel):
         if isinstance(v, datetime.datetime):
             return v
         assert isinstance(v, str), "must be a string"
-        assert re.match(
+        assert TimeSeriesElement.matches_datetime_regex(
+            v
+        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
+        return datetime.datetime.fromisoformat(v)
+
+    @staticmethod
+    def matches_datetime_regex(v: str) -> bool:
+        return re.match(
             r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{4})$",
             v
-        ) is not None, "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
-        return datetime.datetime.fromisoformat(v)
+        ) is not None
 
     @pydantic.model_validator(mode="after")
     def model_validator(self) -> TimeSeriesElement:

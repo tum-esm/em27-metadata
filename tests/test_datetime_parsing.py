@@ -5,16 +5,19 @@ import em27_metadata
 @pytest.mark.library
 def test_datetime_parsing() -> None:
     assert em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
-        "2016-10-01T00:00:00+00:00"
+        "2016-10-01T00:00:00+0000"
     )
     assert em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
-        "2016-10-01T23:00:00+00:00"
+        "2016-10-01T23:00:00+0000"
     )
     assert em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
-        "2016-10-01T00:00:00+01:00"
+        "2016-10-01T00:00:00+0100"
     )
     assert not em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
-        "2016-10-01T00:00:00+00:0"
+        "2016-10-01T00:00:00+000"
+    )
+    assert not em27_metadata.types.TimeSeriesElement.matches_datetime_regex(
+        "2016-10-01T00:00:00+3300"
     )
 
 

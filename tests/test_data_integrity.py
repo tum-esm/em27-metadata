@@ -13,31 +13,28 @@ DATA_DIR = os.path.join(
 @pytest.mark.action
 def test_data_integrity() -> None:
     with open(os.path.join(DATA_DIR, "locations.json")) as f:
-        locations = [
-            em27_metadata.types.LocationMetadata.model_validate(l)
-            for l in json.load(f)
-        ]
+        locations = em27_metadata.types.LocationMetadata.model_validate_json(
+            f.read()
+        )
 
     with open(os.path.join(DATA_DIR, "sensors.json")) as f:
-        sensors = [
-            em27_metadata.types.SensorMetadata.model_validate(l)
-            for l in json.load(f)
-        ]
+        sensors = em27_metadata.types.SensorMetadata.model_validate_json(
+            f.read()
+        )
 
     with open(os.path.join(DATA_DIR, "campaigns.json")) as f:
-        campaigns = [
-            em27_metadata.types.CampaignMetadata.model_validate(l)
-            for l in json.load(f)
-        ]
+        campaigns = em27_metadata.types.CampaignMetadata.model_validate_json(
+            f.read()
+        )
 
     location_data = em27_metadata.interfaces.EM27MetadataInterface(
         locations, sensors, campaigns
     )
 
-    example_sensor = location_data.sensors[0]
-    example_sensor_location = example_sensor.locations[0]
+    example_sensor = location_data.sensors.root[0]
+    example_sensor_setup = example_sensor.setups[0]
 
-    date_string = example_sensor_location.from_datetime.strftime("%Y-%m-%d")
+    date_string = example_sensor_setup.from_datetime.strftime("%Y-%m-%d")
     from_datetime = datetime.datetime.fromisoformat(
         f"{date_string}T00:00:00+00:00"
     )
@@ -50,4 +47,4 @@ def test_data_integrity() -> None:
     )
     assert len(example_sensor_data_contexts) >= 1
     for sdc in example_sensor_data_contexts:
-        assert sdc.location.location_id == example_sensor_location.location_id
+        assert sdc.location.location_id == example_sensor_setup.value.location_id
