@@ -12,16 +12,16 @@ repository = "https://github.com/tum-esm/em27-metadata"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pydantic = "^2.4.2"
+pydantic = "^2.5.3"
 requests = "^2.31.0"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
-mypy = "^1.5.1"
-types-requests = "^2.31.0.6"
+pytest = "^7.4.4"
+mypy = "^1.8.0"
+types-requests = "^2.31.0.20231231"
 yapf = "^0.40.2"
 python-dotenv = "^1.0.0"
 
@@ -32,7 +32,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.mypy]
 strict = true
 implicit_reexport = true
-no_warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
