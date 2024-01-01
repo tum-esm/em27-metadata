@@ -7,9 +7,9 @@ import em27_metadata
 class EM27MetadataInterface:
     def __init__(
         self,
-        locations: List[em27_metadata.types.LocationMetadata],
-        sensors: List[em27_metadata.types.SensorMetadata],
-        campaigns: List[em27_metadata.types.CampaignMetadata] = [],
+        locations: em27_metadata.types.LocationMetadataList,
+        sensors: em27_metadata.types.SensorMetadataList,
+        campaigns: em27_metadata.types.CampaignMetadataList = [],
     ):
         """Create a new EM27MetadataInterface object.
 
@@ -39,15 +39,8 @@ class EM27MetadataInterface:
         """
 
         self.locations = locations
-        self.sensors = em27_metadata.types.SensorMetadataList(root=sensors)
-        self.campaigns = em27_metadata.types.CampaignMetadataList(
-            root=campaigns
-        )
-
-        self.location_ids = [s.location_id for s in self.locations]
-        self.sensor_ids = [s.sensor_id for s in self.sensors]
-        self.campaign_ids = [s.campaign_id for s in self.campaigns]
-
+        self.sensors = sensors
+        self.campaigns = campaigns
         _test_data_integrity(self.locations, self.sensors, self.campaigns)
 
     def get(
@@ -148,33 +141,25 @@ class _DatetimeSeriesItem(pydantic.BaseModel):
 
 
 def _test_data_integrity(
-    locations: List[em27_metadata.types.LocationMetadata],
-    sensors: List[em27_metadata.types.SensorMetadata],
-    campaigns: List[em27_metadata.types.CampaignMetadata],
+    locations: em27_metadata.types.LocationMetadataList,
+    sensors: em27_metadata.types.SensorMetadataList,
+    campaigns: em27_metadata.types.CampaignMetadataList,
 ) -> None:
     """This function tests the integrity of the metadata.
     
     See the `EM27MetadataInterface` constructor for details."""
 
-    location_ids = [s.location_id for s in locations]
-    sensor_ids = [s.sensor_id for s in sensors]
-
-    # unique ids
-    # TODO: move that to root model validators
-    assert len(set(location_ids)
-              ) == len(location_ids), "location ids are not unique"
-
     # reference existence in sensors.json
-    for s1 in sensors:
-        for l1 in s1.locations:
-            assert l1.location_id in location_ids, f"unknown location id {l1.location_id}"
+    for s1 in sensors.root:
+        for l1 in s1.setups:
+            assert l1.value.location_id in locations.location_ids, f"unknown location id {l1.location_id}"
 
     # reference existence in campaigns.json
-    for c1 in campaigns:
+    for c1 in campaigns.root:
         for _sid in c1.sensor_ids:
-            assert _sid in sensor_ids, f"unknown sensor id {_sid}"
+            assert _sid in sensors.sensor_ids, f"unknown sensor id {_sid}"
         for _lid in c1.location_ids:
-            assert _lid in location_ids, f"unknown location id {_lid}"
+            assert _lid in locations.location_ids, f"unknown location id {_lid}"
 
     # integrity of time series in sensors.json
     # TODO: move that to root model validators

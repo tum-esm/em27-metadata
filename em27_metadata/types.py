@@ -122,10 +122,18 @@ class LocationMetadata(pydantic.BaseModel):
     alt: float = pydantic.Field(..., ge=-20, le=10000)
 
 
-# TODO: use rootmodel
-# TODO: validate uniqueness and shit here
-class LocationMetadataList(pydantic.BaseModel):
-    locations: List[LocationMetadata]
+class LocationMetadataList(pydantic.RootModel[List[LocationMetadata]]):
+    root: List[LocationMetadata]
+
+    @property
+    def location_ids(self: LocationMetadataList) -> List[str]:
+        return [_l.location_id for _l in self.root]
+
+    @pydantic.model_validator(mode="after")
+    def check_id_uniqueness(self: LocationMetadataList) -> LocationMetadataList:
+        if len(self.location_ids) > len(set(self.location_ids)):
+            raise ValueError("Location IDs should be unique")
+        return self
 
 
 class SensorMetadata(pydantic.BaseModel):
@@ -170,11 +178,14 @@ class SensorMetadata(pydantic.BaseModel):
 class SensorMetadataList(pydantic.RootModel[List[SensorMetadata]]):
     root: List[SensorMetadata]
 
+    @property
+    def sensor_ids(self: SensorMetadataList) -> List[str]:
+        return [_l.sensor_id for _l in self.root]
+
     @pydantic.model_validator(mode="after")
     def check_id_uniqueness(self: SensorMetadataList) -> SensorMetadataList:
-        sensor_ids = [_s.sensor_id for _s in self.root]
-        if len(sensor_ids) > len(set(sensor_ids)):
-            raise ValueError("Sensr IDs should be unique")
+        if len(self.sensor_ids) > len(set(self.sensor_ids)):
+            raise ValueError("Sensor IDs should be unique")
         return self
 
 
@@ -196,10 +207,13 @@ class CampaignMetadata(TimeSeriesElement):
 class CampaignMetadataList(pydantic.RootModel[List[CampaignMetadata]]):
     root: List[CampaignMetadata]
 
+    @property
+    def campaign_ids(self: CampaignMetadataList) -> List[str]:
+        return [_l.campaign_id for _l in self.root]
+
     @pydantic.model_validator(mode="after")
     def check_id_uniqueness(self: CampaignMetadataList) -> CampaignMetadataList:
-        campaign_ids = [_c.campaign_id for _c in self.root]
-        if len(campaign_ids) > len(set(campaign_ids)):
+        if len(self.campaign_ids) > len(set(self.campaign_ids)):
             raise ValueError("Campaign IDs should be unique")
         return self
 
