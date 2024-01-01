@@ -206,8 +206,6 @@ class SensorDataContext(pydantic.BaseModel):
     pressure_data_source: str
     calibration_factors: CalibrationFactors
 
-    multiple_ctx_on_this_date: bool
-
     @pydantic.field_serializer("from_datetime", "to_datetime")
     def t_serializer(self, dt: datetime.date, _info: Any) -> str:
         return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
