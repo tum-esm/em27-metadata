@@ -2,60 +2,59 @@
   {
     "sensor_id": "sid1",
     "serial_number": 50,
-    "different_utc_offsets": [
-      {
-        "from_datetime": "2020-08-26T00:00:00+00:00",
-        "to_datetime": "2020-09-26T23:59:59+00:00",
-        "utc_offset": 2
-      }
-    ],
-    "different_pressure_data_sources": [
+    "setups": [
       {
         "from_datetime": "2020-08-26T00:00:00+00:00",
         "to_datetime": "2020-08-30T23:59:59+00:00",
-        "source": "LMU-MIM01-height-adjusted"
-      }
-    ],
-    "different_calibration_factors": [
-      {
-        "from_datetime": "2020-08-26T00:00:00+00:00",
-        "to_datetime": "2020-10-01T23:59:59+00:00",
-        "pressure": 1.001,
-        "xco2": {
-          "factors": [1.001, 0.0007],
-          "scheme": "Ohyama2021"
-        },
-        "xch4": {
-          "factors": [1.002, 0.0008],
-          "scheme": "Ohyama2021"
-        },
-        "xco": {
-          "factors": [1.003, 0.0009],
-          "scheme": "Ohyama2021"
+        "value": {
+          "location_id": "lid1",
+          "pressure_data_source": "LMU-MIM01-height-adjusted",
+          "utc_offset": 2
         }
-      }
-    ],
-    "locations": [
+      },
       {
-        "from_datetime": "2020-08-26T00:00:00+00:00",
+        "from_datetime": "2020-08-31T00:00:00+00:00",
         "to_datetime": "2020-09-26T23:59:59+00:00",
-        "location_id": "lid1"
+        "value": { "location_id": "lid1", "utc_offset": 2 }
       },
       {
         "from_datetime": "2020-09-27T00:00:00+00:00",
         "to_datetime": "2020-10-01T23:59:59+00:00",
-        "location_id": "lid2"
+        "value": { "location_id": "lid2" }
+      }
+    ],
+    "calibration_factors": [
+      {
+        "from_datetime": "2020-08-26T00:00:00+00:00",
+        "to_datetime": "2020-10-01T23:59:59+00:00",
+        "value": {
+          "pressure": 1.001,
+          "xco2": {
+            "factors": [1.001, 0.0007],
+            "scheme": "Ohyama2021"
+          },
+          "xch4": {
+            "factors": [1.002, 0.0008],
+            "scheme": "Ohyama2021"
+          },
+          "xco": {
+            "factors": [1.003, 0.0009],
+            "scheme": "Ohyama2021"
+          }
+        }
       }
     ]
   },
   {
     "sensor_id": "sid2",
     "serial_number": 51,
-    "locations": [
+    "setups": [
       {
         "from_datetime": "2020-08-26T00:00:00+00:00",
         "to_datetime": "2020-10-01T23:59:59+00:00",
-        "location_id": "lid1"
+        "value": {
+          "location_id": "lid1"
+        }
       }
     ]
   }
