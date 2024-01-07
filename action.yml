@@ -7,10 +7,10 @@ runs:
     # check-out repo and set-up python
     - name: Check out repository
       uses: actions/checkout@v3
-    - name: Set up Python 3.11.5
+    - name: Set up Python 3.12.1
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11.5"
+        python-version: "3.12.1"
 
     # move all library files into working directory; this makes
     # testing easier whebecausen we don't have to worry about
@@ -31,7 +31,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: .venv
-        key: venv-${{ runner.os }}-3.11.5-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ runner.os }}-3.12.1-${{ hashFiles('poetry.lock') }}
 
     # install & configure poetry if cache does not exist
     - name: Install Poetry

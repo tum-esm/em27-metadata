@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "em27_metadata"
-version = "1.0.0-rc.4"
+version = "1.0.0-rc.5"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 readme = "README.md"
 authors = [
@@ -12,8 +12,8 @@ repository = "https://github.com/tum-esm/em27-metadata"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pydantic = "^2.5.3"
 requests = "^2.31.0"
+pydantic = "^2.5.3"
 
 [tool.poetry.group.dev]
 optional = true
