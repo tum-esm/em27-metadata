@@ -135,6 +135,18 @@ class EM27MetadataInterface:
                         self.locations.root,
                     )
                 )
+                atmospheric_profile_location: em27_metadata.types.LocationMetadata
+                if setup.atmospheric_profile_location_id is not None:
+                    atmospheric_profile_location = next(
+                        filter(
+                            lambda l: l.location_id == setup.
+                            atmospheric_profile_location_id,
+                            self.locations.root,
+                        )
+                    )
+                else:
+                    atmospheric_profile_location = location
+
             except StopIteration:
                 continue
             try:
@@ -162,11 +174,7 @@ class EM27MetadataInterface:
                         if setup.pressure_data_source else sensor.sensor_id
                     ),
                     calibration_factors=calibration_factor,
-                    atmospheric_profile_location_id=(
-                        setup.atmospheric_profile_location_id
-                        if setup.atmospheric_profile_location_id else
-                        setup.location_id
-                    ),
+                    atmospheric_profile_location=atmospheric_profile_location,
                 )
             )
 

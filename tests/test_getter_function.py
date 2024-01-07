@@ -147,7 +147,7 @@ def test_getter_function() -> None:
     assert location_ids == ["lid1", "lid1", "lid2", "lid2", "lid2", "lid2"]
 
     atmospheric_profile_location_ids = [
-        c.atmospheric_profile_location_id for c in chunks
+        c.atmospheric_profile_location.location_id for c in chunks
     ]
     assert atmospheric_profile_location_ids == [
         "lid1", "lid1", "lid2", "lid2", "lid2", "lid1"

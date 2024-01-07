@@ -257,7 +257,7 @@ class SensorDataContext(pydantic.BaseModel):
     utc_offset: float
     pressure_data_source: str
     calibration_factors: CalibrationFactors
-    atmospheric_profile_location_id: str
+    atmospheric_profile_location: LocationMetadata
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
     def t_serializer(self, dt: datetime.date, _info: Any) -> str:
