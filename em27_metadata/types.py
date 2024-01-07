@@ -20,8 +20,8 @@ class TimeSeriesElement(pydantic.BaseModel):
         assert isinstance(v, str), "must be a string"
         assert TimeSeriesElement.matches_datetime_regex(
             v
-        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HH:MM"
-        return datetime.datetime.fromisoformat(v)
+        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HHMM"
+        return datetime.datetime.strptime(v, "%Y-%m-%dT%H:%M:%S%z")
 
     @staticmethod
     def matches_datetime_regex(v: str) -> bool:
@@ -33,6 +33,8 @@ class TimeSeriesElement(pydantic.BaseModel):
     @pydantic.model_validator(mode="after")
     def model_validator(self) -> TimeSeriesElement:
         assert self.from_datetime < self.to_datetime, "from_datetime must be before to_datetime"
+        assert self.from_datetime.second == 0, "from_datetime must be at the beginning of a minute"
+        assert self.to_datetime.second == 59, "to_datetime must be at the beginning of a minute"
         return self
 
     @pydantic.field_serializer("from_datetime", "to_datetime")

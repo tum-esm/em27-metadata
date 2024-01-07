@@ -94,19 +94,38 @@ class EM27MetadataInterface:
             dt for dt in set([
                 from_datetime,
                 *[_l.from_datetime for _l in sensor.setups],
+                *[
+                    _l.from_datetime - datetime.timedelta(seconds=1)
+                    for _l in sensor.setups
+                ],
                 *[_l.to_datetime for _l in sensor.setups],
+                *[
+                    _l.to_datetime + datetime.timedelta(seconds=1)
+                    for _l in sensor.setups
+                ],
                 *[_c.from_datetime for _c in sensor.calibration_factors],
+                *[
+                    _c.from_datetime - datetime.timedelta(seconds=1)
+                    for _c in sensor.calibration_factors
+                ],
                 *[_c.to_datetime for _c in sensor.calibration_factors],
+                *[
+                    _c.to_datetime + datetime.timedelta(seconds=1)
+                    for _c in sensor.calibration_factors
+                ],
                 to_datetime,
             ]) if from_datetime <= dt <= to_datetime
         ])
 
         sensor_data_contexts: List[em27_metadata.types.SensorDataContext] = []
         for from_dt, to_dt in zip(breakpoints[:-1], breakpoints[1 :]):
+            if (to_dt - from_dt).total_seconds() == 1 or (from_dt == to_dt):
+                continue
             try:
                 setup = next(
                     filter(
-                        lambda s: s.from_datetime <= from_dt <= s.to_datetime,
+                        lambda s: s.from_datetime <= from_dt <= to_dt <= s.
+                        to_datetime,
                         sensor.setups,
                     )
                 ).value
@@ -121,7 +140,8 @@ class EM27MetadataInterface:
             try:
                 calibration_factor = next(
                     filter(
-                        lambda c: c.from_datetime <= from_dt <= c.to_datetime,
+                        lambda c: c.from_datetime <= from_dt <= to_dt <= c.
+                        to_datetime,
                         sensor.calibration_factors,
                     )
                 ).value
@@ -137,7 +157,10 @@ class EM27MetadataInterface:
                     to_datetime=to_dt,
                     location=location,
                     utc_offset=setup.utc_offset,
-                    pressure_data_source=setup.pressure_data_source,
+                    pressure_data_source=(
+                        setup.pressure_data_source
+                        if setup.pressure_data_source else sensor.sensor_id
+                    ),
                     calibration_factors=calibration_factor,
                 )
             )
