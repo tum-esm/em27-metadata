@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "em27_metadata"
-version = "1.0.0-rc.5"
+version = "1.0.0-rc.6"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 readme = "README.md"
 authors = [
