@@ -81,13 +81,13 @@ def test_getter_function() -> None:
                         value=em27_metadata.types.Setup(
                             location_id="lid1",
                             pressure_data_source="another",
-                            utc_offset=3,
+                            utc_offset=3.7,
                         ),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T12:00:00+0000",
                         to_datetime="2020-02-01T22:59:59+0000",
-                        value=em27_metadata.types.Setup(location_id="lid2", ),
+                        value=em27_metadata.types.Setup(location_id="lid2"),
                     ),
                 ]
             ),
@@ -100,12 +100,18 @@ def test_getter_function() -> None:
         campaigns=em27_metadata.types.CampaignMetadataList(root=[]),
     )
 
-    from_datetime = datetime.datetime.fromisoformat("2020-02-01T00:00:00+0000")
-    to_datetime = datetime.datetime.fromisoformat("2020-02-01T23:59:59+0000")
+    from_datetime = datetime.datetime.fromisoformat("2020-02-01T00:00:00+00:00")
+    to_datetime = datetime.datetime.fromisoformat("2020-02-01T23:59:59+00:00")
 
     chunks = metadata.get("sid1", from_datetime, to_datetime)
     # 1-2, 2-10, 12-13, 13-14, 14-23
 
+    for c in chunks:
+        print(
+            c.model_dump_json(
+                indent=4,  #include=set(["from_datetime", "to_datetime"])
+            ) + ","
+        )
     assert len(chunks) == 5
 
     # check correct splitting
@@ -131,7 +137,7 @@ def test_getter_function() -> None:
     assert location_ids == ["lid1", "lid1", "lid2", "lid2", "lid2"]
 
     utc_offsets = [c.utc_offset for c in chunks]
-    assert utc_offsets == [1, 1, 0, 0, 0]
+    assert utc_offsets == [3.7, 3.7, 0, 0, 0]
 
     pressure_data_sources = [c.pressure_data_source for c in chunks]
     assert pressure_data_sources == [
