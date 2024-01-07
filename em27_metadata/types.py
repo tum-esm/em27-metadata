@@ -101,6 +101,12 @@ class Setup(pydantic.BaseModel):
         description=
         "UTC offset of the location, if not set, using an offset of 0",
     )
+    atmospheric_profile_location_id: Optional[str] = pydantic.Field(
+        None,
+        min_length=1,
+        description=
+        "Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
+    )
 
 
 class CalibrationFactorsListItem(TimeSeriesElement):
@@ -251,6 +257,7 @@ class SensorDataContext(pydantic.BaseModel):
     utc_offset: float
     pressure_data_source: str
     calibration_factors: CalibrationFactors
+    atmospheric_profile_location_id: str
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
     def t_serializer(self, dt: datetime.date, _info: Any) -> str:

@@ -162,6 +162,11 @@ class EM27MetadataInterface:
                         if setup.pressure_data_source else sensor.sensor_id
                     ),
                     calibration_factors=calibration_factor,
+                    atmospheric_profile_location_id=(
+                        setup.atmospheric_profile_location_id
+                        if setup.atmospheric_profile_location_id else
+                        setup.location_id
+                    ),
                 )
             )
 
