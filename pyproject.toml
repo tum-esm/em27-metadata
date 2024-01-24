@@ -38,7 +38,7 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-build.includes = ["em27_metadata", "data"]
+build.includes = ["em27_metadata"]
 build.excludes = ["tests"]
 
 [tool.mypy]

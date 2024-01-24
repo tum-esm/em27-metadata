@@ -130,23 +130,14 @@ def load_from_local_files(
 
 
 def load_from_example_data() -> em27_metadata.interfaces.EM27MetadataInterface:
-    _PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-    with open(os.path.join(_PROJECT_DIR, "data", "locations.json")) as f:
-        locations = em27_metadata.types.LocationMetadataList.model_validate_json(
-            f.read()
-        )
-
-    with open(os.path.join(_PROJECT_DIR, "data", "sensors.json")) as f:
-        sensors = em27_metadata.types.SensorMetadataList.model_validate_json(
-            f.read()
-        )
-
-    with open(os.path.join(_PROJECT_DIR, "data", "campaigns.json")) as f:
-        campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(
-            f.read()
-        )
-
-    return em27_metadata.interfaces.EM27MetadataInterface(
-        locations=locations, sensors=sensors, campaigns=campaigns
+    return load_from_local_files(
+        locations_path=os.path.join(
+            _PACKAGE_DIR, "sample-data", "locations.json"
+        ),
+        sensors_path=os.path.join(_PACKAGE_DIR, "sample-data", "sensors.json"),
+        campaigns_path=os.path.join(
+            _PACKAGE_DIR, "sample-data", "campaigns.json"
+        ),
     )
