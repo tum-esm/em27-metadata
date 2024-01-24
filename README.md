@@ -23,9 +23,9 @@ This repository only contains a Python library to interact with the metadata. Th
 Install as a library:
 
 ```bash
-poetry add em27-metadata
+poetry add em27_metadata
 # or
-pip install em27-metadata
+pip install em27_metadata
 ```
 
 ```python

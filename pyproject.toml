@@ -1,42 +1,41 @@
-[tool.poetry]
+[project]
 name = "em27_metadata"
-version = "1.0.0-rc.6"
+version = "1.0.0-rc.7"
 description = "Single source of truth for ESM's EM27 measurement logistics"
-readme = "README.md"
 authors = [
-    "Moritz Makowski <moritz.makowski@tum.de>",
-    "Marlon Mueller <marlon.mueller@tum.de>",
+    { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
+    { name = "Marlon Müller", email = "marlon.mueller@tum.de" },
 ]
-packages = [{ include = "em27_metadata" }]
+dependencies = ["requests>=2.31.0", "pydantic>=2.5.3"]
+requires-python = ">=3.8,<=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+
+[project.urls]
 repository = "https://github.com/tum-esm/em27-metadata"
+documentation = "https://em27-retrieval-pipeline.netlify.app/"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-requests = "^2.31.0"
-pydantic = "^2.5.3"
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.4"
-mypy = "^1.8.0"
-types-requests = "^2.31.0.20231231"
-yapf = "^0.40.2"
-python-dotenv = "^1.0.0"
-
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "mypy>=1.8.0",
+    "types-requests>=2.31.0.20240106",
+    "yapf>=0.40.2",
+    "python-dotenv>=1.0.1",
+]
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+build.includes = ["em27_metadata", "data"]
+build.excludes = ["tests"]
 
 [tool.mypy]
 strict = true
 implicit_reexport = true
 plugins = ["pydantic.mypy"]
-
-[[tool.mypy.overrides]]
-module = ["pendulum"]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 markers = [
