@@ -44,50 +44,68 @@ em27_metadata_store = em27_metadata.load_from_local_files(
     campaigns_path="location-data/campaigns.json",
 )
 
-metadata = em27_metadata_store.get(
-    sensor_id = "ma",
-    from_datetime = datetime.datetime(
-        year=2022, month=6, day=1, hour=0, minute=0, second=0
-    ),
-    to_datetime = datetime.datetime(
-        year=2022, month=6, day=1, hour=23, minute=59, second=59
-    ),
-)
-
-print(metadata)
-
+metadata = location_data.get(
+      sensor_id="sid1",
+      from_datetime=datetime.datetime(
+          2020, 8, 26, 0, 0, 0, tzinfo=datetime.timezone.utc
+      ),
+      to_datetime=datetime.datetime(
+          2020, 8, 26, 23, 59, 59, tzinfo=datetime.timezone.utc
+      ),
+  )
+  print(metadata)
 ```
 
-Prints out:
+Prints out something like this:
 
 ```json
 [
   {
-    "sensor_id": "ma",
-    "serial_number": 61,
-    "from_datetime": "2022-06-01T00:00:00+00:00",
-    "to_datetime": "2022-06-01T23:59:59+00:00",
+    "sensor_id": "sid1",
+    "serial_number": 50,
+    "from_datetime": "2020-08-26T00:00:00+0000",
+    "to_datetime": "2020-08-26T23:59:59+0000",
     "location": {
-      "location_id": "TUM_I",
-      "details": "TUM Dach Innenstadt",
-      "lon": 11.569,
-      "lat": 48.151,
-      "alt": 539
+      "location_id": "lid1",
+      "details": "description of location 1",
+      "lon": 10.5,
+      "lat": 48.1,
+      "alt": 500.0
     },
-    "utc_offset": 0,
-    "pressure_data_source": "ma",
-    "pressure_calibration_factor": 1,
-    "output_calibration_factors_xco2": 1,
-    "output_calibration_factors_xch4": 1,
-    "output_calibration_factors_xco": 1,
-    "output_calibration_scheme": null
+    "utc_offset": 2.0,
+    "pressure_data_source": "LMU-MIM01-height-adjusted",
+    "calibration_factors": {
+      "pressure": 1.001,
+      "xco2": {
+        "factors": [1.001, 0.0007],
+        "scheme": "Ohyama2021",
+        "note": null
+      },
+      "xch4": {
+        "factors": [1.002, 0.0008],
+        "scheme": "Ohyama2021",
+        "note": null
+      },
+      "xco": {
+        "factors": [1.003, 0.0009],
+        "scheme": "Ohyama2021",
+        "note": null
+      }
+    },
+    "atmospheric_profile_location": {
+      "location_id": "lid1",
+      "details": "description of location 1",
+      "lon": 10.5,
+      "lat": 48.1,
+      "alt": 500.0
+    }
   }
 ]
 ```
 
 The object returned by `em27_metadata_store.get()` is of type `list[em27_metadata.types.SensorDataContext]`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.model_dump()`.
 
-The list will contain one item per time period where the metadata properties are continuous (same location, etc.). You can find dummy data in the `data/` folder.
+The list will contain one item per time period where the metadata properties are continuous (same setup, and same calibration factors). You can find dummy data in the `data/` folder.
 
 <br/>
 
@@ -108,7 +126,7 @@ pytest -m "ci"
 # used inside the GitHub Actions workflow for storage repos
 pytest -m "action"
 
-# can be used for local development (skips pulling from GitHub)
+# can be used for local development (libe "ci", but skips pulling from GitHub)
 pytest -m "local"
 ```
 
@@ -118,9 +136,3 @@ Publish the Package to PyPI:
 poetry build
 poetry publish
 ```
-
-In order to test the "get metadata for a time period" function, the following example is used:
-
-![](./docs/example.png)
-
-The test `tests/test_data_integrity.py` requests the time period `00:00` to `23:59`. The UTC offsets are specified (to be non-zero) from `02:00` to `15:59`, where it has one non-zero value, and from `16:00` to `21:59`, where it has another non-zero value. Each property has two (non-default) values over the day. There should be eight resulting chunks of metadata. All properties of each chunk are validated in the test.
