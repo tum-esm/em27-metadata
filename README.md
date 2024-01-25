@@ -10,6 +10,8 @@ This repository is the single source of truth for our EM27 measurement logistics
 - Automatic testing of the files integrities
 - Easy import as a statically typed Python library
 
+This tool was developed as part of the [EM27 Retrieval Pipeline](https://em27-retrieval-pipeline.netlify.app/).
+
 <br/>
 
 ## How it works
@@ -112,6 +114,8 @@ The list will contain one item per time period where the metadata properties are
 ## Set up an EM27 Metadata Storage Directory
 
 You can use the repository https://github.com/tum-esm/em27-metadata-storage-template to create your own repository for storing the metadata. It contains a GitHub Actions workflow that automatically validates the metadata on every commit in any branch.
+
+A full reference for the three JSON schemas can be found at https://em27-retrieval-pipeline.netlify.app/api-reference/metadata.
 
 <br/>
 
