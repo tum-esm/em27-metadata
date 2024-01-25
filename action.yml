@@ -4,27 +4,24 @@ description: "Test the integrity of a repository containing EM27 metadata"
 runs:
   using: "composite"
   steps:
-    # check-out repo and set-up python
     - name: Check out repository
       uses: actions/checkout@v4
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
-        cache: "pip"
 
     # move all library files into working directory; this makes
-    # testing easier whebecausen we don't have to worry about
-    # different paths for the repo and the action. Copying the
-    # README.md is required for the poetry install command
+    # testing easier because we don't have to worry about
+    # different paths for the repo and the action.
     - name: Copy action files
       run: |
         cp -r ${{ github.action_path }}/tests .
         cp -r ${{ github.action_path }}/em27_metadata .
         cp ${{ github.action_path }}/pyproject.toml .
-        cp ${{ github.action_path }}/pdm.lock .
-        cp ${{ github.action_path }}/README.md .
       shell: bash
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: "pip"
 
     # install dependencies if cache does not exist
     - name: Install dependencies

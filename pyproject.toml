@@ -1,6 +1,6 @@
 [project]
 name = "em27_metadata"
-version = "1.0.0-rc.7"
+version = "1.0.0-rc.8"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
@@ -28,7 +28,7 @@ documentation = "https://em27-retrieval-pipeline.netlify.app/"
 dev = [
     "pytest>=7.4.4",
     "mypy>=1.8.0",
-    "types-requests>=2.31.0.20240106",
+    "types-requests>=2.31.0.20240125",
     "yapf>=0.40.2",
     "python-dotenv>=1.0.1",
 ]
