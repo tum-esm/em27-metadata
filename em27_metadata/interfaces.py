@@ -61,10 +61,10 @@ class EM27MetadataInterface:
         """For a given `sensor_id`, return the list of metadata contexts between
         `from_datetime` and `to_datetime`.
         
-        Each "context" is a time period where the setup and the calibration factors
-        are constant. For example, when requesting a full 24 hour day, and the setup
-        changed at noon, but the calibration factors stayed the same, the returned list
-        willccontain two items: One context until noon, and one context after noon.
+        Each "context" is a time period where the setup is constant. For example,
+        when requesting a full 24 hour day, and the setup changed at noon, the
+        returned list will contain two items: One context until noon, and one
+        context after noon.
         
         Args:
             sensor_id:      The sensor ID.
@@ -76,6 +76,8 @@ class EM27MetadataInterface:
         Raises:
             ValueError:      If the `sensor_id` is unknown or the `from_datetime` is
                              greater than the given `to_datetime`."""
+
+        # TODO: simplify this method because now there are not calibration factors anymore
 
         try:
             sensor = next(
@@ -101,16 +103,6 @@ class EM27MetadataInterface:
                 *[
                     _l.to_datetime + datetime.timedelta(seconds=1)
                     for _l in sensor.setups
-                ],
-                *[_c.from_datetime for _c in sensor.calibration_factors],
-                *[
-                    _c.from_datetime - datetime.timedelta(seconds=1)
-                    for _c in sensor.calibration_factors
-                ],
-                *[_c.to_datetime for _c in sensor.calibration_factors],
-                *[
-                    _c.to_datetime + datetime.timedelta(seconds=1)
-                    for _c in sensor.calibration_factors
                 ],
                 to_datetime,
             ]) if from_datetime <= dt <= to_datetime
@@ -148,17 +140,6 @@ class EM27MetadataInterface:
 
             except StopIteration:
                 continue
-            try:
-                calibration_factor = next(
-                    filter(
-                        lambda c: c.from_datetime <= from_dt <= to_dt <= c.
-                        to_datetime,
-                        sensor.calibration_factors,
-                    )
-                ).value
-            except StopIteration:
-                # just use the default with all ones
-                calibration_factor = em27_metadata.types.CalibrationFactors()
 
             sensor_data_contexts.append(
                 em27_metadata.types.SensorDataContext(
@@ -172,7 +153,6 @@ class EM27MetadataInterface:
                         setup.pressure_data_source
                         if setup.pressure_data_source else sensor.sensor_id
                     ),
-                    calibration_factors=calibration_factor,
                     atmospheric_profile_location=atmospheric_profile_location,
                 )
             )

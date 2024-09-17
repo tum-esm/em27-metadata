@@ -6,7 +6,10 @@ authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
     { name = "Marlon Müller", email = "marlon.mueller@tum.de" },
 ]
-dependencies = ["requests>=2.31.0", "pydantic>=2.5.3"]
+dependencies = [
+    "requests>=2.31.0",
+    "pydantic>=2.9.1",
+]
 requires-python = ">=3.10,<4.0"
 readme = "README.md"
 license = { text = "MIT" }

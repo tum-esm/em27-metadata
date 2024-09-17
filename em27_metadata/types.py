@@ -42,45 +42,6 @@ class TimeSeriesElement(pydantic.BaseModel):
         return dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 
-class GasSpecificCalibrationFactors(pydantic.BaseModel):
-    factors: list[float] = pydantic.Field(
-        [1],
-        description=
-        "List of calibration factors. The scheme defines how to use them.",
-    )
-    scheme: Optional[str] = pydantic.Field(
-        None,
-        description='Used calibration scheme - for example "Ohyama 2021".' +
-        " This can be an arbitrary string or `null`.",
-    )
-    note: Optional[str] = pydantic.Field(
-        None,
-        description=
-        'Optional note, e.g. "actual = factors[0] * measured + factors[1]"',
-    )
-
-
-class CalibrationFactors(pydantic.BaseModel):
-    """These can be either single values to be applied by
-        multiplication/division or a list of values for example
-        for one airmass-independent and one airmass-dependent
-        factor (see Ohyama 2021)."""
-
-    pressure: float = pydantic.Field(
-        1,
-        description="Pressure calibration factor. estimate = measured * factor",
-    )
-    xco2: GasSpecificCalibrationFactors = pydantic.Field(
-        GasSpecificCalibrationFactors()
-    )
-    xch4: GasSpecificCalibrationFactors = pydantic.Field(
-        GasSpecificCalibrationFactors()
-    )
-    xco: GasSpecificCalibrationFactors = pydantic.Field(
-        GasSpecificCalibrationFactors()
-    )
-
-
 class Setup(pydantic.BaseModel):
     location_id: str = pydantic.Field(
         ...,
@@ -107,11 +68,6 @@ class Setup(pydantic.BaseModel):
         description=
         "Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
     )
-
-
-class CalibrationFactorsListItem(TimeSeriesElement):
-    """An element in the `sensor.calibration_factors` list"""
-    value: CalibrationFactors
 
 
 class SetupsListItem(TimeSeriesElement):
@@ -151,13 +107,7 @@ class LocationMetadataList(pydantic.RootModel[list[LocationMetadata]]):
 
 
 class SensorMetadata(pydantic.BaseModel):
-    """Metadata for a single sensor.
-    
-    `sensor_id`, `serial_number` and `locations` are required. The other items
-    - `different_utc_offsets`, `different_pressure_data_sources` and 
-    `different_calibration_factors` - are only needed of they deviate from the
-    default values (no UTC offset, pressure data source is "built-in" on,
-    no calibration of pressure or output values)."""
+    """Metadata for a single sensor."""
 
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
     sensor_id: str = pydantic.Field(
@@ -176,14 +126,15 @@ class SensorMetadata(pydantic.BaseModel):
         description="Serial number of the EM27/SUN",
     )
     setups: list[SetupsListItem] = pydantic.Field(..., min_length=0)
-    calibration_factors: list[CalibrationFactorsListItem] = pydantic.Field(
+    calibration_factors: list[Any] = pydantic.Field(
         [],
-        description=(
-            "List of calibration factors to used. Only required if the" +
-            "calibration factor is not 1.0. The pressure calibration factor" +
-            " is applied before the retrieval, the other factors are applied" +
-            " to the results produced by Proffast/GFIT."
+        deprecated=(
+            "This field has been deprecated. Every Research group has their " +
+            "own strategy of calibrating their data, hence, we don't want to " +
+            "propose any standard with this. Also it calibration is more " +
+            "complex than just multiplying a factor to the data."
         ),
+        exclude=True
     )
 
     @pydantic.model_validator(mode="after")
@@ -192,13 +143,6 @@ class SensorMetadata(pydantic.BaseModel):
             if s2.from_datetime <= s1.to_datetime:
                 raise ValueError(
                     "Setups timeseries are overlapping or unsorted"
-                )
-        for c1, c2 in zip(
-            self.calibration_factors[:-1], self.calibration_factors[1 :]
-        ):
-            if c2.from_datetime <= c1.to_datetime:
-                raise ValueError(
-                    "Calibration Factors timeseries are overlapping or unsorted"
                 )
         return self
 
@@ -256,7 +200,16 @@ class SensorDataContext(pydantic.BaseModel):
     # set to default values if not specified
     utc_offset: float
     pressure_data_source: str
-    calibration_factors: CalibrationFactors
+    calibration_factors: Any = pydantic.Field(
+        None,
+        deprecated=(
+            "This field has been deprecated. Every Research group has their " +
+            "own strategy of calibrating their data, hence, we don't want to " +
+            "propose any standard with this. Also it calibration is more " +
+            "complex than just multiplying a factor to the data."
+        ),
+        exclude=True
+    )
     atmospheric_profile_location: LocationMetadata
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
