@@ -26,14 +26,13 @@ def _request_github_file(
     """
 
     url = f"https://raw.githubusercontent.com/{github_repository}/main/{filepath}"
-    response = requests.get(
-        url,
-        headers={
-            "Authorization": f"token {access_token}",
-            "Accept": "application/text",
-        },
-        timeout=10,
-    )
+    headers = {
+        "Accept": "application/text",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if access_token is not None:
+        headers["Authorization"] = f"token {access_token}"
+    response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
     return response.text
 

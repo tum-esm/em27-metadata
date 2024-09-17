@@ -26,8 +26,7 @@ jobs:
       # run tests
       - name: Run pytests
         env:
-          GITHUB_REPOSITORY: ${{ github.action_repository }}
-          GITHUB_ACCESS_TOKEN: ${{ github.token }}
+          TUM_ESM_GITHUB_ACCESS_TOKEN: ${{ secrets.TUM_ESM_GITHUB_ACCESS_TOKEN }}
         run: python -m pytest tests/ -m "library"
 
       - name: Check whether code formatting is correct

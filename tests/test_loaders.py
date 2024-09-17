@@ -7,11 +7,20 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @pytest.mark.library
-def test_remote_loader() -> None:
-    dotenv.load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+def test_remote_loader_public_repo() -> None:
+    em27_metadata.load_from_github("tum-esm/em27-metadata")
+
+
+@pytest.mark.library
+def test_remote_loader_private_repo() -> None:
+    env_file = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(env_file):
+        dotenv.load_dotenv(env_file)
+    access_token = os.getenv("TUM_ESM_GITHUB_ACCESS_TOKEN")
+    assert access_token is not None
+    assert access_token.startswith("github_pat_")
     em27_metadata.load_from_github(
-        "tum-esm/em27-metadata",
-        access_token=os.getenv("GITHUB_ACCESS_TOKEN"),
+        "tum-esm/em27-metadata-storage", access_token=access_token
     )
 
 
