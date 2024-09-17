@@ -98,7 +98,7 @@ class EM27MetadataInterface:
                 (from_datetime, to_datetime),
                 (setup.from_datetime, setup.to_datetime)
             ) is not None:
-                relevant_setups.append(setup)
+                relevant_setups.append(setup.model_copy(deep=True))
 
         for s1, s2 in zip(relevant_setups[:-1], relevant_setups[1 :]):
             assert s1.to_datetime < s2.from_datetime, f"this should not happen, overlapping setups: {s1} and {s2}"
