@@ -1,6 +1,6 @@
 [project]
 name = "em27_metadata"
-version = "1.1.0"
+version = "1.1.1"
 description = "Single source of truth for ESM's EM27 measurement logistics"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },

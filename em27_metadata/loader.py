@@ -129,10 +129,11 @@ def load_from_local_files(
 
 
 def load_from_example_data() -> em27_metadata.interfaces.EM27MetadataInterface:
-    _PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+    _SAMPLE_DATA_DIR = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "sample_data"
+    )
     return load_from_local_files(
-        locations_path=os.path.join(_PROJECT_DIR, "data", "locations.json"),
-        sensors_path=os.path.join(_PROJECT_DIR, "data", "sensors.json"),
-        campaigns_path=os.path.join(_PROJECT_DIR, "data", "campaigns.json"),
+        locations_path=os.path.join(_SAMPLE_DATA_DIR, "locations.json"),
+        sensors_path=os.path.join(_SAMPLE_DATA_DIR, "sensors.json"),
+        campaigns_path=os.path.join(_SAMPLE_DATA_DIR, "campaigns.json"),
     )
