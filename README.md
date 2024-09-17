@@ -76,24 +76,6 @@ Prints out something like this:
     },
     "utc_offset": 2.0,
     "pressure_data_source": "LMU-MIM01-height-adjusted",
-    "calibration_factors": {
-      "pressure": 1.001,
-      "xco2": {
-        "factors": [1.001, 0.0007],
-        "scheme": "Ohyama2021",
-        "note": null
-      },
-      "xch4": {
-        "factors": [1.002, 0.0008],
-        "scheme": "Ohyama2021",
-        "note": null
-      },
-      "xco": {
-        "factors": [1.003, 0.0009],
-        "scheme": "Ohyama2021",
-        "note": null
-      }
-    },
     "atmospheric_profile_location": {
       "location_id": "lid1",
       "details": "description of location 1",
@@ -107,7 +89,7 @@ Prints out something like this:
 
 The object returned by `em27_metadata_store.get()` is of type `list[em27_metadata.types.SensorDataContext]`. It is a Pydantic model (https://docs.pydantic.dev/) but can be converted to a dictionary using `metadata.model_dump()`.
 
-The list will contain one item per time period where the metadata properties are continuous (same setup, and same calibration factors). You can find dummy data in the `data/` folder.
+The list will contain one item per time period where the metadata properties are continuous (same setup). You can find dummy data in the `data/` folder.
 
 <br/>
 
