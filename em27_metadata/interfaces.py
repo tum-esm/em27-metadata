@@ -77,8 +77,6 @@ class EM27MetadataInterface:
             ValueError:      If the `sensor_id` is unknown or the `from_datetime` is
                              greater than the given `to_datetime`."""
 
-        # TODO: simplify this method because now there are not calibration factors anymore
-
         try:
             sensor = next(
                 filter(lambda s: s.sensor_id == sensor_id, self.sensors.root)
@@ -91,67 +89,61 @@ class EM27MetadataInterface:
                 f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
             )
 
-        breakpoints: list[datetime.datetime] = sorted([
-            dt for dt in set([
-                from_datetime,
-                *[_l.from_datetime for _l in sensor.setups],
-                *[
-                    _l.from_datetime - datetime.timedelta(seconds=1)
-                    for _l in sensor.setups
-                ],
-                *[_l.to_datetime for _l in sensor.setups],
-                *[
-                    _l.to_datetime + datetime.timedelta(seconds=1)
-                    for _l in sensor.setups
-                ],
-                to_datetime,
-            ]) if from_datetime <= dt <= to_datetime
-        ])
+        # find all relevant setups
+
+        relevant_setups: list[em27_metadata.types.SetupsListItem] = []
+        for setup in sensor.setups:
+            if (from_datetime <= setup.from_datetime <= to_datetime
+               ) or (from_datetime <= setup.to_datetime <= to_datetime):
+                relevant_setups.append(setup)
+
+        for s1, s2 in zip(relevant_setups[:-1], relevant_setups[1 :]):
+            assert s1.to_datetime < s2.from_datetime, f"this should not happen, overlapping setups: {s1} and {s2}"
+
+        # crop setups list to requested time period
+
+        if relevant_setups[0].from_datetime < from_datetime:
+            relevant_setups[0].from_datetime = from_datetime
+
+        if relevant_setups[-1].to_datetime > to_datetime:
+            relevant_setups[-1].to_datetime = to_datetime
+
+        # create sensor data contexts
 
         sensor_data_contexts: list[em27_metadata.types.SensorDataContext] = []
-        for from_dt, to_dt in zip(breakpoints[:-1], breakpoints[1 :]):
-            if (to_dt - from_dt).total_seconds() == 1 or (from_dt == to_dt):
+        for setup in relevant_setups:
+            if setup.from_datetime >= setup.to_datetime:
                 continue
-            try:
-                setup = next(
+
+            location = next(
+                filter(
+                    lambda l: l.location_id == setup.value.location_id,
+                    self.locations.root,
+                )
+            )
+            atmospheric_profile_location: em27_metadata.types.LocationMetadata
+            if setup.value.atmospheric_profile_location_id is not None:
+                atmospheric_profile_location = next(
                     filter(
-                        lambda s: s.from_datetime <= from_dt <= to_dt <= s.
-                        to_datetime,
-                        sensor.setups,
-                    )
-                ).value
-                location = next(
-                    filter(
-                        lambda l: l.location_id == setup.location_id,
+                        lambda l: l.location_id == setup.value.
+                        atmospheric_profile_location_id,
                         self.locations.root,
                     )
                 )
-                atmospheric_profile_location: em27_metadata.types.LocationMetadata
-                if setup.atmospheric_profile_location_id is not None:
-                    atmospheric_profile_location = next(
-                        filter(
-                            lambda l: l.location_id == setup.
-                            atmospheric_profile_location_id,
-                            self.locations.root,
-                        )
-                    )
-                else:
-                    atmospheric_profile_location = location
-
-            except StopIteration:
-                continue
+            else:
+                atmospheric_profile_location = location
 
             sensor_data_contexts.append(
                 em27_metadata.types.SensorDataContext(
                     sensor_id=sensor.sensor_id,
                     serial_number=sensor.serial_number,
-                    from_datetime=from_dt,
-                    to_datetime=to_dt,
+                    from_datetime=setup.from_datetime,
+                    to_datetime=setup.to_datetime,
                     location=location,
-                    utc_offset=setup.utc_offset,
+                    utc_offset=setup.value.utc_offset,
                     pressure_data_source=(
-                        setup.pressure_data_source
-                        if setup.pressure_data_source else sensor.sensor_id
+                        setup.value.pressure_data_source if
+                        setup.value.pressure_data_source else sensor.sensor_id
                     ),
                     atmospheric_profile_location=atmospheric_profile_location,
                 )
