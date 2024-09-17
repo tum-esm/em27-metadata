@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, List
+from typing import Any, Optional
 import datetime
 import re
 import pydantic
@@ -43,7 +43,7 @@ class TimeSeriesElement(pydantic.BaseModel):
 
 
 class GasSpecificCalibrationFactors(pydantic.BaseModel):
-    factors: List[float] = pydantic.Field(
+    factors: list[float] = pydantic.Field(
         [1],
         description=
         "List of calibration factors. The scheme defines how to use them.",
@@ -136,11 +136,11 @@ class LocationMetadata(pydantic.BaseModel):
     alt: float = pydantic.Field(..., ge=-20, le=10000)
 
 
-class LocationMetadataList(pydantic.RootModel[List[LocationMetadata]]):
-    root: List[LocationMetadata]
+class LocationMetadataList(pydantic.RootModel[list[LocationMetadata]]):
+    root: list[LocationMetadata]
 
     @property
-    def location_ids(self: LocationMetadataList) -> List[str]:
+    def location_ids(self: LocationMetadataList) -> list[str]:
         return [_l.location_id for _l in self.root]
 
     @pydantic.model_validator(mode="after")
@@ -175,8 +175,8 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    setups: List[SetupsListItem] = pydantic.Field(..., min_length=0)
-    calibration_factors: List[CalibrationFactorsListItem] = pydantic.Field(
+    setups: list[SetupsListItem] = pydantic.Field(..., min_length=0)
+    calibration_factors: list[CalibrationFactorsListItem] = pydantic.Field(
         [],
         description=(
             "List of calibration factors to used. Only required if the" +
@@ -203,11 +203,11 @@ class SensorMetadata(pydantic.BaseModel):
         return self
 
 
-class SensorMetadataList(pydantic.RootModel[List[SensorMetadata]]):
-    root: List[SensorMetadata]
+class SensorMetadataList(pydantic.RootModel[list[SensorMetadata]]):
+    root: list[SensorMetadata]
 
     @property
-    def sensor_ids(self: SensorMetadataList) -> List[str]:
+    def sensor_ids(self: SensorMetadataList) -> list[str]:
         return [_l.sensor_id for _l in self.root]
 
     @pydantic.model_validator(mode="after")
@@ -228,15 +228,15 @@ class CampaignMetadata(TimeSeriesElement):
             "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
-    sensor_ids: List[str]
-    location_ids: List[str]
+    sensor_ids: list[str]
+    location_ids: list[str]
 
 
-class CampaignMetadataList(pydantic.RootModel[List[CampaignMetadata]]):
-    root: List[CampaignMetadata] = []
+class CampaignMetadataList(pydantic.RootModel[list[CampaignMetadata]]):
+    root: list[CampaignMetadata] = []
 
     @property
-    def campaign_ids(self: CampaignMetadataList) -> List[str]:
+    def campaign_ids(self: CampaignMetadataList) -> list[str]:
         return [_l.campaign_id for _l in self.root]
 
     @pydantic.model_validator(mode="after")

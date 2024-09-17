@@ -1,4 +1,3 @@
-from typing import List
 import datetime
 import em27_metadata
 
@@ -58,7 +57,7 @@ class EM27MetadataInterface:
         sensor_id: str,
         from_datetime: datetime.datetime,
         to_datetime: datetime.datetime,
-    ) -> List[em27_metadata.types.SensorDataContext]:
+    ) -> list[em27_metadata.types.SensorDataContext]:
         """For a given `sensor_id`, return the list of metadata contexts between
         `from_datetime` and `to_datetime`.
         
@@ -90,7 +89,7 @@ class EM27MetadataInterface:
                 f"from_datetime ({from_datetime}) > to_datetime ({to_datetime})"
             )
 
-        breakpoints: List[datetime.datetime] = sorted([
+        breakpoints: list[datetime.datetime] = sorted([
             dt for dt in set([
                 from_datetime,
                 *[_l.from_datetime for _l in sensor.setups],
@@ -117,7 +116,7 @@ class EM27MetadataInterface:
             ]) if from_datetime <= dt <= to_datetime
         ])
 
-        sensor_data_contexts: List[em27_metadata.types.SensorDataContext] = []
+        sensor_data_contexts: list[em27_metadata.types.SensorDataContext] = []
         for from_dt, to_dt in zip(breakpoints[:-1], breakpoints[1 :]):
             if (to_dt - from_dt).total_seconds() == 1 or (from_dt == to_dt):
                 continue

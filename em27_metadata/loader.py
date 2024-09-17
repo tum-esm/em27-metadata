@@ -1,5 +1,5 @@
-import os
 from typing import Optional
+import os
 import requests
 import em27_metadata
 
