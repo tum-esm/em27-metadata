@@ -32,9 +32,18 @@ class TimeSeriesElement(pydantic.BaseModel):
 
     @pydantic.model_validator(mode="after")
     def model_validator(self) -> TimeSeriesElement:
-        assert self.from_datetime < self.to_datetime, "from_datetime must be before to_datetime"
-        assert self.from_datetime.second == 0, "from_datetime must be at the beginning of a minute"
-        assert self.to_datetime.second == 59, "to_datetime must be at the beginning of a minute"
+        if self.from_datetime > self.to_datetime:
+            raise ValueError(
+                f"from_datetime ({self.from_datetime}) > to_datetime ({self.to_datetime})"
+            )
+        if self.from_datetime.second != 0:
+            raise ValueError(
+                "from_datetime must be at the beginning of a minute (second=0)"
+            )
+        if self.to_datetime.second != 59:
+            raise ValueError(
+                "to_datetime must be at the beginning of a minute (second=59)"
+            )
         return self
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
@@ -101,8 +110,9 @@ class LocationMetadataList(pydantic.RootModel[list[LocationMetadata]]):
 
     @pydantic.model_validator(mode="after")
     def check_id_uniqueness(self: LocationMetadataList) -> LocationMetadataList:
-        if len(self.location_ids) > len(set(self.location_ids)):
-            raise ValueError("Location IDs should be unique")
+        for location_id in self.location_ids:
+            if self.location_ids.count(location_id) > 1:
+                raise ValueError(f"Location ID {location_id} is not unique")
         return self
 
 
@@ -139,10 +149,14 @@ class SensorMetadata(pydantic.BaseModel):
 
     @pydantic.model_validator(mode="after")
     def check_timeseries_integrity(self: SensorMetadata) -> SensorMetadata:
-        for s1, s2 in zip(self.setups[:-1], self.setups[1 :]):
-            if s2.from_datetime <= s1.to_datetime:
+        times: list[datetime.datetime] = []
+        for s in self.setups:
+            times.append(s.from_datetime)
+            times.append(s.to_datetime)
+        for t1, t2 in zip(times[:-1], times[1 :]):
+            if t2 <= t1:
                 raise ValueError(
-                    "Setups timeseries are overlapping or unsorted"
+                    f"Setups timeseries are overlapping or unsorted: {t1} > {t2}"
                 )
         return self
 
@@ -156,8 +170,9 @@ class SensorMetadataList(pydantic.RootModel[list[SensorMetadata]]):
 
     @pydantic.model_validator(mode="after")
     def check_id_uniqueness(self: SensorMetadataList) -> SensorMetadataList:
-        if len(self.sensor_ids) > len(set(self.sensor_ids)):
-            raise ValueError("Sensor IDs should be unique")
+        for sensor_id in self.sensor_ids:
+            if self.sensor_ids.count(sensor_id) > 1:
+                raise ValueError(f"Sensor ID {sensor_id} is not unique")
         return self
 
 
@@ -185,8 +200,9 @@ class CampaignMetadataList(pydantic.RootModel[list[CampaignMetadata]]):
 
     @pydantic.model_validator(mode="after")
     def check_id_uniqueness(self: CampaignMetadataList) -> CampaignMetadataList:
-        if len(self.campaign_ids) > len(set(self.campaign_ids)):
-            raise ValueError("Campaign IDs should be unique")
+        for campaign_id in self.campaign_ids:
+            if self.campaign_ids.count(campaign_id) > 1:
+                raise ValueError(f"Campaign ID {campaign_id} is not unique")
         return self
 
 
