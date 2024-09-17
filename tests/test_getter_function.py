@@ -62,9 +62,14 @@ def test_getter_function() -> None:
         campaigns=em27_metadata.types.CampaignMetadataList(root=[]),
     )
 
+    from_datetime = datetime.datetime.fromisoformat("2018-02-01T00:00:00+00:00")
+    to_datetime = datetime.datetime.fromisoformat("2019-02-02T23:59:59+00:00")
+    chunks = metadata.get("sid1", from_datetime, to_datetime)
+    # none
+    assert len(chunks) == 0
+
     from_datetime = datetime.datetime.fromisoformat("2020-02-01T00:00:00+00:00")
     to_datetime = datetime.datetime.fromisoformat("2020-02-02T23:59:59+00:00")
-
     chunks = metadata.get("sid1", from_datetime, to_datetime)
     # 1-10, 12-22, 22-24
 

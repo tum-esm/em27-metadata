@@ -100,6 +100,9 @@ class EM27MetadataInterface:
         for s1, s2 in zip(relevant_setups[:-1], relevant_setups[1 :]):
             assert s1.to_datetime < s2.from_datetime, f"this should not happen, overlapping setups: {s1} and {s2}"
 
+        if len(relevant_setups) == 0:
+            return []
+
         # crop setups list to requested time period
 
         if relevant_setups[0].from_datetime < from_datetime:
