@@ -1,5 +1,6 @@
 import datetime
 import em27_metadata
+import tum_esm_utils
 
 
 class EM27MetadataInterface:
@@ -93,8 +94,10 @@ class EM27MetadataInterface:
 
         relevant_setups: list[em27_metadata.types.SetupsListItem] = []
         for setup in sensor.setups:
-            if (from_datetime <= setup.from_datetime <= to_datetime
-               ) or (from_datetime <= setup.to_datetime <= to_datetime):
+            if tum_esm_utils.timing.datetime_span_intersection(
+                (from_datetime, to_datetime),
+                (setup.from_datetime, setup.to_datetime)
+            ) is not None:
                 relevant_setups.append(setup)
 
         for s1, s2 in zip(relevant_setups[:-1], relevant_setups[1 :]):
