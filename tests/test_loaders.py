@@ -27,13 +27,7 @@ def test_remote_loader_private_repo() -> None:
 @pytest.mark.library
 def test_local_loader() -> None:
     em27_metadata.load_from_local_files(
-        locations_path=os.path.join(
-            PROJECT_DIR, "em27_metadata", "sample-data", "locations.json"
-        ),
-        sensors_path=os.path.join(
-            PROJECT_DIR, "em27_metadata", "sample-data", "sensors.json"
-        ),
-        campaigns_path=os.path.join(
-            PROJECT_DIR, "em27_metadata", "sample-data", "campaigns.json"
-        ),
+        locations_path=os.path.join(PROJECT_DIR, "data", "locations.json"),
+        sensors_path=os.path.join(PROJECT_DIR, "data", "sensors.json"),
+        campaigns_path=os.path.join(PROJECT_DIR, "data", "campaigns.json"),
     )
