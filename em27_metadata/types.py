@@ -8,8 +8,12 @@ import pydantic
 class TimeSeriesElement(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
-    from_datetime: datetime.datetime
-    to_datetime: datetime.datetime
+    from_datetime: datetime.datetime = pydantic.Field(
+        ..., validation_alias=pydantic.AliasChoices("from_datetime", "from_dt")
+    )
+    to_datetime: datetime.datetime = pydantic.Field(
+        ..., validation_alias=pydantic.AliasChoices("to_datetime", "to_dt")
+    )
 
     @pydantic.field_validator("from_datetime", "to_datetime", mode="before")
     def datetime_string_validator(
@@ -57,12 +61,14 @@ class Setup(pydantic.BaseModel):
         min_length=1,
         description=
         "Location ID referring to a location named in `locations.json`",
+        validation_alias=pydantic.AliasChoices("location_id", "lid"),
     )
     pressure_data_source: Optional[str] = pydantic.Field(
         None,
         min_length=1,
         description=
         "Pressure data source, if not set, using the pressure of the sensor",
+        validation_alias=pydantic.AliasChoices("pressure_data_source", "pds"),
     )
     utc_offset: float = pydantic.Field(
         0,
@@ -76,12 +82,17 @@ class Setup(pydantic.BaseModel):
         min_length=1,
         description=
         "Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
+        validation_alias=pydantic.AliasChoices(
+            "atmospheric_profile_location_id", "profile_lid"
+        ),
     )
 
 
 class SetupsListItem(TimeSeriesElement):
     """An element in the `sensor.setups` list"""
-    value: Setup
+    value: Setup = pydantic.Field(
+        ..., validation_alias=pydantic.AliasChoices("value", "v")
+    )
 
 
 class LocationMetadata(pydantic.BaseModel):
