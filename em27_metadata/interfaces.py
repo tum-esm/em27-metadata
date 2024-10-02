@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 import em27_metadata
 import tum_esm_utils
 
@@ -174,3 +175,79 @@ class EM27MetadataInterface:
             )
 
         return sensor_data_contexts
+
+    def explode_efficiently(
+        self,
+        sensor_id: str,
+        datetimes: list[datetime.datetime],
+    ) -> list[Optional[tuple[
+        em27_metadata.types.LocationMetadata,
+        float,
+        str,
+        em27_metadata.types.LocationMetadata,
+    ]]]:
+        """For a given `sensor_id`, return the list of metadata contexts for each
+        datetime in `datetimes`.
+        
+        Returns: list[tuple[location, utc_offset, pressure_data_source, atmospheric_profile_location]]"""
+
+        try:
+            sensor = next(
+                filter(lambda s: s.sensor_id == sensor_id, self.sensors.root)
+            )
+        except StopIteration:
+            raise ValueError(f"Unknown sensor_id {sensor_id}")
+
+        out: list[Optional[tuple[
+            em27_metadata.types.LocationMetadata,
+            float,
+            str,
+            em27_metadata.types.LocationMetadata,
+        ]]] = []
+
+        current_setup_index = 0
+        for i, dt in enumerate(datetimes):
+            # skip all setups smaller than the current datetime
+            while dt > sensor.setups[current_setup_index].to_datetime:
+                current_setup_index += 1
+                if current_setup_index >= len(sensor.setups):
+                    break
+
+            # add nones if the current datetime is larger than the last setup
+            if current_setup_index >= len(sensor.setups):
+                out.extend([None] * (len(datetimes) - i))
+                break
+
+            # add none if the current datetime is smaller than the next setup
+            if dt < sensor.setups[current_setup_index].from_datetime:
+                out.append(None)
+                continue
+
+            setup = sensor.setups[current_setup_index]
+            location = next(
+                filter(
+                    lambda l: l.location_id == setup.value.location_id,
+                    self.locations.root,
+                )
+            )
+            atmospheric_profile_location: em27_metadata.types.LocationMetadata
+            if setup.value.atmospheric_profile_location_id is not None:
+                atmospheric_profile_location = next(
+                    filter(
+                        lambda l: l.location_id == setup.value.
+                        atmospheric_profile_location_id,
+                        self.locations.root,
+                    )
+                )
+            else:
+                atmospheric_profile_location = location
+
+            out.append((
+                location,
+                setup.value.utc_offset,
+                setup.value.pressure_data_source
+                if setup.value.pressure_data_source else sensor.sensor_id,
+                atmospheric_profile_location,
+            ))
+
+        return out
