@@ -31,7 +31,7 @@ def test_validation_alias() -> None:
         utc_offset=3,
         atmospheric_profile_location_id="4",
     )
-    s2 = Setup(
+    s2 = Setup( # type: ignore
         lid="1",
         pds="2",
         utc_offset=3,
@@ -56,11 +56,11 @@ def test_validation_alias() -> None:
     sli1 = SetupsListItem(
         from_datetime=datetime.datetime(2021, 1, 1),
         to_datetime=datetime.datetime(2021, 1, 2, 23, 59, 59),
-        v=s1,
+        value=s1,
     )
-    sli2 = SetupsListItem(
+    sli2 = SetupsListItem(  # type: ignore
         from_dt=datetime.datetime(2021, 1, 1),
         to_dt=datetime.datetime(2021, 1, 2, 23, 59, 59),
-        value=s2,
+        v=s2,
     )
     assert sli1 == sli2
