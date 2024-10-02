@@ -92,8 +92,20 @@ class EM27MetadataInterface:
 
         # find all relevant setups
 
-        relevant_setups: list[em27_metadata.types.SetupsListItem] = []
+        merged_setups: list[em27_metadata.types.SetupsListItem] = []
         for setup in sensor.setups:
+            try:
+                assert len(merged_setups) > 0
+                last_setup = merged_setups[-1]
+                assert (setup.from_datetime -
+                        last_setup.to_datetime).total_seconds() == 1
+                assert last_setup.value == setup.value
+                merged_setups[-1].to_datetime = setup.to_datetime
+            except AssertionError:
+                merged_setups.append(setup.model_copy(deep=True))
+
+        relevant_setups: list[em27_metadata.types.SetupsListItem] = []
+        for setup in merged_setups:
             if tum_esm_utils.timing.datetime_span_intersection(
                 (from_datetime, to_datetime),
                 (setup.from_datetime, setup.to_datetime)
@@ -102,6 +114,12 @@ class EM27MetadataInterface:
 
         for s1, s2 in zip(relevant_setups[:-1], relevant_setups[1 :]):
             assert s1.to_datetime < s2.from_datetime, f"this should not happen, overlapping setups: {s1} and {s2}"
+
+        for i in range(len(relevant_setups)):
+            relevant_setups[i].from_datetime = relevant_setups[
+                i].from_datetime.astimezone(datetime.timezone.utc)
+            relevant_setups[i].to_datetime = relevant_setups[
+                i].to_datetime.astimezone(datetime.timezone.utc)
 
         if len(relevant_setups) == 0:
             return []
