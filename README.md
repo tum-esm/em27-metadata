@@ -1,5 +1,7 @@
 # EM27 Metadata
 
+[<img alt="Static Badge" src="https://img.shields.io/badge/DOI-10.5281/zenodo.14285078-%23bae6fd?labelColor=%230f172a"/>](https://doi.org/10.5281/zenodo.14285078)
+
 ## The purpose of this library
 
 This repository is the single source of truth for our EM27 measurement logistics: "Where has each station been on each day of measurements?" We selected this format over putting it in a database due to various reasons:
