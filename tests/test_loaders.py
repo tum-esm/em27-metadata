@@ -16,9 +16,9 @@ def test_remote_loader_private_repo() -> None:
     env_file = os.path.join(os.path.dirname(__file__), ".env")
     if os.path.exists(env_file):
         dotenv.load_dotenv(env_file)
-    access_token = os.getenv("TUM_ESM_GITHUB_ACCESS_TOKEN")
+    access_token = os.getenv("GITHUB_ACCESS_TOKEN")
     assert access_token is not None
-    assert access_token.startswith("github_pat_")
+    assert access_token.startswith("ghp_") or access_token.startswith("github_pat_")
     em27_metadata.load_from_github("tum-esm/em27-metadata-storage", access_token=access_token)
 
 
