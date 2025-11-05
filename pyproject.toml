@@ -29,6 +29,7 @@ dev = [
     "types-requests>=2.31.0.20240125",
     "python-dotenv>=1.0.1",
     "ruff>=0.14.3",
+    "pyright>=1.1.407",
 ]
 
 [build-system]
@@ -58,3 +59,6 @@ markers = [
     "action: run when using this repo as a GitHub Action",
 ]
 addopts = "--exitfirst --verbose --durations=0 --no-header"
+
+[tool.pyright]
+strict = ["em27_metadata", "tests"]
