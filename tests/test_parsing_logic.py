@@ -31,12 +31,7 @@ def test_validation_alias() -> None:
         utc_offset=3,
         atmospheric_profile_location_id="4",
     )
-    s2 = Setup(
-        lid="1",
-        pds="2",
-        utc_offset=3,
-        profile_lid="4",
-    )
+    s2 = Setup(lid="1", pds="2", utc_offset=3, profile_lid="4")  # pyright: ignore[reportCallIssue]
     assert s1.location_id == s2.location_id
     assert s1.pressure_data_source == s2.pressure_data_source
     assert s1.utc_offset == s2.utc_offset
@@ -58,8 +53,8 @@ def test_validation_alias() -> None:
         value=s1,
     )
     sli2 = SetupsListItem(
-        from_dt=datetime.datetime(2021, 1, 1),
-        to_dt=datetime.datetime(2021, 1, 2, 23, 59, 59),
-        v=s2,
+        from_dt=datetime.datetime(2021, 1, 1),  # pyright: ignore[reportCallIssue]
+        to_dt=datetime.datetime(2021, 1, 2, 23, 59, 59),  # pyright: ignore[reportCallIssue]
+        v=s2,  # pyright: ignore[reportCallIssue]
     )
     assert sli1 == sli2

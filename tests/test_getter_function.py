@@ -30,8 +30,8 @@ def test_getter_function() -> None:
                 serial_number=51,
                 setups=[
                     em27_metadata.types.SetupsListItem(
-                        from_datetime="2020-02-01T01:00:00+0000",
-                        to_datetime="2020-02-01T09:59:59+0000",
+                        from_datetime="2020-02-01T01:00:00+0000",  # pyright: ignore[reportArgumentType]
+                        to_datetime="2020-02-01T09:59:59+0000",  # pyright: ignore[reportArgumentType]
                         value=em27_metadata.types.Setup(
                             location_id="lid1",
                             pressure_data_source="another",
@@ -39,15 +39,15 @@ def test_getter_function() -> None:
                         ),
                     ),
                     em27_metadata.types.SetupsListItem(
-                        from_datetime="2020-02-01T12:00:00+0000",
-                        to_datetime="2020-02-01T21:59:59+0000",
+                        from_datetime="2020-02-01T12:00:00+0000",  # pyright: ignore[reportArgumentType]
+                        to_datetime="2020-02-01T21:59:59+0000",  # pyright: ignore[reportArgumentType]
                         value=em27_metadata.types.Setup(
                             location_id="lid2",
                         ),
                     ),
                     em27_metadata.types.SetupsListItem(
-                        from_datetime="2020-02-01T22:00:00+0000",
-                        to_datetime="2020-02-03T22:59:59+0000",
+                        from_datetime="2020-02-01T22:00:00+0000",  # pyright: ignore[reportArgumentType]
+                        to_datetime="2020-02-03T22:59:59+0000",  # pyright: ignore[reportArgumentType]
                         value=em27_metadata.types.Setup(
                             location_id="lid2", atmospheric_profile_location_id="lid1"
                         ),

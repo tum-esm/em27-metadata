@@ -57,19 +57,19 @@ class Setup(pydantic.BaseModel):
         validation_alias=pydantic.AliasChoices("location_id", "lid"),
     )
     pressure_data_source: Optional[str] = pydantic.Field(
-        None,
+        default=None,
         min_length=1,
         description="Pressure data source, if not set, using the pressure of the sensor",
         validation_alias=pydantic.AliasChoices("pressure_data_source", "pds"),
     )
     utc_offset: float = pydantic.Field(
-        0,
+        default=0,
         gt=-12,
         lt=12,
         description="UTC offset of the location, if not set, using an offset of 0",
     )
     atmospheric_profile_location_id: Optional[str] = pydantic.Field(
-        None,
+        default=None,
         min_length=1,
         description="Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
         validation_alias=pydantic.AliasChoices("atmospheric_profile_location_id", "profile_lid"),
@@ -133,9 +133,12 @@ class SensorMetadata(pydantic.BaseModel):
         ge=1,
         description="Serial number of the EM27/SUN",
     )
-    setups: list[SetupsListItem] = pydantic.Field(..., min_length=0)
+    setups: list[SetupsListItem] = pydantic.Field(
+        ...,
+        min_length=0,
+    )
     calibration_factors: list[Any] = pydantic.Field(
-        [],
+        default=[],
         deprecated=(
             "This field has been deprecated. Every Research group has their "
             + "own strategy of calibrating their data, hence, we don't want to "
@@ -208,7 +211,11 @@ class EventMetadata(TimeSeriesElement):
         min_length=1,
         description="List of sensor IDs involved in the event",
     )
-    description: str = pydantic.Field(..., min_length=1, description="Description of the event")
+    description: str = pydantic.Field(
+        ...,
+        min_length=1,
+        description="Description of the event",
+    )
     data_is_usable: bool = pydantic.Field(
         ...,
         description="Indicates if the data recorded during the event is usable for downstream analysis",
@@ -230,7 +237,7 @@ class SensorDataContext(pydantic.BaseModel):
     utc_offset: float
     pressure_data_source: str
     calibration_factors: Any = pydantic.Field(
-        None,
+        default=None,
         deprecated=(
             "This field has been deprecated. Every Research group has their "
             + "own strategy of calibrating their data, hence, we don't want to "
