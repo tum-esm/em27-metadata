@@ -1,6 +1,6 @@
 # EM27 Metadata
 
-[<img alt="Static Badge" src="https://img.shields.io/badge/DOI-10.5281/zenodo.14285078-%23bae6fd?labelColor=%230f172a"/>](https://doi.org/10.5281/zenodo.14285078)
+[<img alt="Static Badge" src="https://img.shields.io/badge/DOI-10.5281/zenodo.14284968-%23bae6fd?labelColor=%230f172a"/>](https://doi.org/10.5281/zenodo.14284968)
 
 ## The purpose of this library
 
