@@ -46,7 +46,7 @@ class TimeSeriesElement(pydantic.BaseModel):
             )
         if self.to_datetime.second != 59:
             raise ValueError(
-                "to_datetime must be at the beginning of a minute (second=59)"
+                "to_datetime must be at the end of a minute (second=59)"
             )
         return self
 
@@ -216,6 +216,27 @@ class CampaignMetadataList(pydantic.RootModel[list[CampaignMetadata]]):
                 raise ValueError(f"Campaign ID {campaign_id} is not unique")
         return self
 
+class EventMetadata(TimeSeriesElement):
+    sensor_ids: list[str] = pydantic.Field(
+        ...,
+        min_length=1,
+        description="List of sensor IDs involved in the event",
+    )
+    description: str = pydantic.Field(
+        ..., min_length=1, description="Description of the event"
+    )
+    data_is_usable: bool = pydantic.Field(
+        ..., description="Indicates if the data recorded during the event is usable for downstream analysis"
+    )
+
+
+class EventMetadataList(pydantic.RootModel[list[EventMetadata]]):
+    root: list[EventMetadata]
+
+    @property
+    def location_ids(self: EventMetadataList) -> list[str]:
+        return [_l.location_ids for _l in self.root]
+    
 
 class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
