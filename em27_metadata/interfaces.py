@@ -10,6 +10,7 @@ class EM27MetadataInterface:
         locations: em27_metadata.types.LocationMetadataList,
         sensors: em27_metadata.types.SensorMetadataList,
         campaigns: em27_metadata.types.CampaignMetadataList,
+        events: em27_metadata.types.EventMetadataList = em27_metadata.types.EventMetadataList(root=[])
     ):
         """Create a new EM27MetadataInterface object.
 
@@ -41,6 +42,7 @@ class EM27MetadataInterface:
         self.locations = locations
         self.sensors = sensors
         self.campaigns = campaigns
+        self.events = events
 
         # reference existence in sensors.json
         for s1 in sensors.root:
@@ -53,6 +55,11 @@ class EM27MetadataInterface:
                 assert _sid in sensors.sensor_ids, f"unknown sensor id {_sid}"
             for _lid in c1.location_ids:
                 assert _lid in locations.location_ids, f"unknown location id {_lid}"
+        
+        # reference existence in events.json
+        for e1 in events.root:
+            for _sid in e1.sensor_ids:
+                assert _sid in sensors.sensor_ids, f"unknown sensor id {_sid}"
 
     def get(
         self,
@@ -251,3 +258,28 @@ class EM27MetadataInterface:
             ))
 
         return out
+
+    def get_events(
+        self,
+        sensor_id: str,
+        from_datetime: datetime.datetime,
+        to_datetime: datetime.datetime,
+    ) -> list[em27_metadata.types.EventMetadata]:
+        """For a given `sensor_id`, return the list of events between
+        `from_datetime` and `to_datetime`.
+        
+        Args:
+            sensor_id:      The sensor ID.
+            from_datetime:  The start of the requested time period.
+            to_datetime:    The end of the requested time period.
+        """
+        
+        events: list[em27_metadata.types.EventMetadata] = []
+        for event in self.events.root:
+            if sensor_id in event.sensor_ids:
+                if tum_esm_utils.timing.datetime_span_intersection(
+                    (from_datetime, to_datetime),
+                    (event.from_datetime, event.to_datetime)
+                ) is not None:
+                    events.append(event.model_copy(deep=True))
+        return events
