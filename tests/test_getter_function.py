@@ -41,17 +41,18 @@ def test_getter_function() -> None:
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T12:00:00+0000",
                         to_datetime="2020-02-01T21:59:59+0000",
-                        value=em27_metadata.types.Setup(location_id="lid2", ),
+                        value=em27_metadata.types.Setup(
+                            location_id="lid2",
+                        ),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T22:00:00+0000",
                         to_datetime="2020-02-03T22:59:59+0000",
                         value=em27_metadata.types.Setup(
-                            location_id="lid2",
-                            atmospheric_profile_location_id="lid1"
+                            location_id="lid2", atmospheric_profile_location_id="lid1"
                         ),
                     ),
-                ]
+                ],
             ),
         ]
     )
@@ -95,9 +96,7 @@ def test_getter_function() -> None:
     location_ids = [c.location.location_id for c in chunks]
     assert location_ids == ["lid1", "lid2", "lid2"]
 
-    atmospheric_profile_location_ids = [
-        c.atmospheric_profile_location.location_id for c in chunks
-    ]
+    atmospheric_profile_location_ids = [c.atmospheric_profile_location.location_id for c in chunks]
     assert atmospheric_profile_location_ids == ["lid1", "lid2", "lid1"]
 
     utc_offsets = [c.utc_offset for c in chunks]

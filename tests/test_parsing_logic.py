@@ -31,7 +31,7 @@ def test_validation_alias() -> None:
         utc_offset=3,
         atmospheric_profile_location_id="4",
     )
-    s2 = Setup( # type: ignore
+    s2 = Setup(  # type: ignore
         lid="1",
         pds="2",
         utc_offset=3,
@@ -46,8 +46,7 @@ def test_validation_alias() -> None:
     assert d["location_id"] == s2.location_id
     assert d["pressure_data_source"] == s2.pressure_data_source
     assert d["utc_offset"] == s2.utc_offset
-    assert d["atmospheric_profile_location_id"
-            ] == s2.atmospheric_profile_location_id
+    assert d["atmospheric_profile_location_id"] == s2.atmospheric_profile_location_id
 
     assert "lid" not in d
     assert "pds" not in d

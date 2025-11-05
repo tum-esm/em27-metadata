@@ -12,9 +12,7 @@ def test_static_types() -> None:
     assert r1 == 0, "command returned non-zero exit code"
 
     print("checking em27_metadata/")
-    r2 = os.system(
-        f"cd {PROJECT_DIR} && {sys.executable} -m mypy em27_metadata/"
-    )
+    r2 = os.system(f"cd {PROJECT_DIR} && {sys.executable} -m mypy em27_metadata/")
     assert r2 == 0, "command returned non-zero exit code"
 
     print("checking tests/")

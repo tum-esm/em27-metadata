@@ -16,23 +16,21 @@ class TimeSeriesElement(pydantic.BaseModel):
     )
 
     @pydantic.field_validator("from_datetime", "to_datetime", mode="before")
-    def datetime_string_validator(
-        cls, v: str | datetime.datetime
-    ) -> datetime.datetime:
+    def datetime_string_validator(cls, v: str | datetime.datetime) -> datetime.datetime:
         if isinstance(v, datetime.datetime):
             return v
         assert isinstance(v, str), "must be a string"
-        assert TimeSeriesElement.matches_datetime_regex(
-            v
-        ), "must match the pattern YYYY-MM-DDTHH:MM:SS+HHMM"
+        assert TimeSeriesElement.matches_datetime_regex(v), (
+            "must match the pattern YYYY-MM-DDTHH:MM:SS+HHMM"
+        )
         return datetime.datetime.strptime(v, "%Y-%m-%dT%H:%M:%S%z")
 
     @staticmethod
     def matches_datetime_regex(v: str) -> bool:
-        return re.match(
-            r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{4})$",
-            v
-        ) is not None
+        return (
+            re.match(r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([\+\-])(\d{4})$", v)
+            is not None
+        )
 
     @pydantic.model_validator(mode="after")
     def model_validator(self) -> TimeSeriesElement:
@@ -41,13 +39,9 @@ class TimeSeriesElement(pydantic.BaseModel):
                 f"from_datetime ({self.from_datetime}) > to_datetime ({self.to_datetime})"
             )
         if self.from_datetime.second != 0:
-            raise ValueError(
-                "from_datetime must be at the beginning of a minute (second=0)"
-            )
+            raise ValueError("from_datetime must be at the beginning of a minute (second=0)")
         if self.to_datetime.second != 59:
-            raise ValueError(
-                "to_datetime must be at the end of a minute (second=59)"
-            )
+            raise ValueError("to_datetime must be at the end of a minute (second=59)")
         return self
 
     @pydantic.field_serializer("from_datetime", "to_datetime")
@@ -59,40 +53,33 @@ class Setup(pydantic.BaseModel):
     location_id: str = pydantic.Field(
         ...,
         min_length=1,
-        description=
-        "Location ID referring to a location named in `locations.json`",
+        description="Location ID referring to a location named in `locations.json`",
         validation_alias=pydantic.AliasChoices("location_id", "lid"),
     )
     pressure_data_source: Optional[str] = pydantic.Field(
         None,
         min_length=1,
-        description=
-        "Pressure data source, if not set, using the pressure of the sensor",
+        description="Pressure data source, if not set, using the pressure of the sensor",
         validation_alias=pydantic.AliasChoices("pressure_data_source", "pds"),
     )
     utc_offset: float = pydantic.Field(
         0,
         gt=-12,
         lt=12,
-        description=
-        "UTC offset of the location, if not set, using an offset of 0",
+        description="UTC offset of the location, if not set, using an offset of 0",
     )
     atmospheric_profile_location_id: Optional[str] = pydantic.Field(
         None,
         min_length=1,
-        description=
-        "Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
-        validation_alias=pydantic.AliasChoices(
-            "atmospheric_profile_location_id", "profile_lid"
-        ),
+        description="Location ID referring to a location named in `locations.json`. This location's coordinates are used for the atmospheric profiles in the retrieval.",
+        validation_alias=pydantic.AliasChoices("atmospheric_profile_location_id", "profile_lid"),
     )
 
 
 class SetupsListItem(TimeSeriesElement):
     """An element in the `sensor.setups` list"""
-    value: Setup = pydantic.Field(
-        ..., validation_alias=pydantic.AliasChoices("value", "v")
-    )
+
+    value: Setup = pydantic.Field(..., validation_alias=pydantic.AliasChoices("value", "v"))
 
 
 class LocationMetadata(pydantic.BaseModel):
@@ -102,8 +89,8 @@ class LocationMetadata(pydantic.BaseModel):
         max_length=128,
         pattern=r"^[a-zA-Z0-9_-]+$",
         description=(
-            "Your internal location ID identifying a specific location. " +
-            "Allowed values: letters, numbers, dashes, underscores."
+            "Your internal location ID identifying a specific location. "
+            + "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
     details: str = pydantic.Field("", min_length=0)
@@ -150,12 +137,12 @@ class SensorMetadata(pydantic.BaseModel):
     calibration_factors: list[Any] = pydantic.Field(
         [],
         deprecated=(
-            "This field has been deprecated. Every Research group has their " +
-            "own strategy of calibrating their data, hence, we don't want to " +
-            "propose any standard with this. Also it calibration is more " +
-            "complex than just multiplying a factor to the data."
+            "This field has been deprecated. Every Research group has their "
+            + "own strategy of calibrating their data, hence, we don't want to "
+            + "propose any standard with this. Also it calibration is more "
+            + "complex than just multiplying a factor to the data."
         ),
-        exclude=True
+        exclude=True,
     )
 
     @pydantic.model_validator(mode="after")
@@ -164,11 +151,9 @@ class SensorMetadata(pydantic.BaseModel):
         for s in self.setups:
             times.append(s.from_datetime)
             times.append(s.to_datetime)
-        for t1, t2 in zip(times[:-1], times[1 :]):
+        for t1, t2 in zip(times[:-1], times[1:]):
             if t2 <= t1:
-                raise ValueError(
-                    f"Setups timeseries are overlapping or unsorted: {t1} > {t2}"
-                )
+                raise ValueError(f"Setups timeseries are overlapping or unsorted: {t1} > {t2}")
         return self
 
 
@@ -194,8 +179,8 @@ class CampaignMetadata(TimeSeriesElement):
         max_length=128,
         pattern=r"^[a-zA-Z0-9_-]+$",
         description=(
-            "Your internal sensor ID identifying a specific campaign. " +
-            "Allowed values: letters, numbers, dashes, underscores."
+            "Your internal sensor ID identifying a specific campaign. "
+            + "Allowed values: letters, numbers, dashes, underscores."
         ),
     )
     sensor_ids: list[str]
@@ -216,17 +201,17 @@ class CampaignMetadataList(pydantic.RootModel[list[CampaignMetadata]]):
                 raise ValueError(f"Campaign ID {campaign_id} is not unique")
         return self
 
+
 class EventMetadata(TimeSeriesElement):
     sensor_ids: list[str] = pydantic.Field(
         ...,
         min_length=1,
         description="List of sensor IDs involved in the event",
     )
-    description: str = pydantic.Field(
-        ..., min_length=1, description="Description of the event"
-    )
+    description: str = pydantic.Field(..., min_length=1, description="Description of the event")
     data_is_usable: bool = pydantic.Field(
-        ..., description="Indicates if the data recorded during the event is usable for downstream analysis"
+        ...,
+        description="Indicates if the data recorded during the event is usable for downstream analysis",
     )
 
 
@@ -236,7 +221,7 @@ class EventMetadataList(pydantic.RootModel[list[EventMetadata]]):
     @property
     def location_ids(self: EventMetadataList) -> list[str]:
         return [_l.location_ids for _l in self.root]
-    
+
 
 class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
@@ -251,12 +236,12 @@ class SensorDataContext(pydantic.BaseModel):
     calibration_factors: Any = pydantic.Field(
         None,
         deprecated=(
-            "This field has been deprecated. Every Research group has their " +
-            "own strategy of calibrating their data, hence, we don't want to " +
-            "propose any standard with this. Also it calibration is more " +
-            "complex than just multiplying a factor to the data."
+            "This field has been deprecated. Every Research group has their "
+            + "own strategy of calibrating their data, hence, we don't want to "
+            + "propose any standard with this. Also it calibration is more "
+            + "complex than just multiplying a factor to the data."
         ),
-        exclude=True
+        exclude=True,
     )
     atmospheric_profile_location: LocationMetadata
 

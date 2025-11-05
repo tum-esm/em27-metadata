@@ -19,9 +19,7 @@ def test_remote_loader_private_repo() -> None:
     access_token = os.getenv("TUM_ESM_GITHUB_ACCESS_TOKEN")
     assert access_token is not None
     assert access_token.startswith("github_pat_")
-    em27_metadata.load_from_github(
-        "tum-esm/em27-metadata-storage", access_token=access_token
-    )
+    em27_metadata.load_from_github("tum-esm/em27-metadata-storage", access_token=access_token)
 
 
 @pytest.mark.library
