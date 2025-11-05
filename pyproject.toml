@@ -27,8 +27,8 @@ dev = [
     "pytest>=7.4.4",
     "mypy>=1.8.0",
     "types-requests>=2.31.0.20240125",
-    "yapf>=0.40.2",
     "python-dotenv>=1.0.1",
+    "ruff>=0.14.3",
 ]
 
 [build-system]
@@ -58,10 +58,3 @@ markers = [
     "action: run when using this repo as a GitHub Action",
 ]
 addopts = "--exitfirst --verbose --durations=0 --no-header"
-
-[tool.yapf]
-based_on_style = "facebook"
-coalesce_brackets = true
-split_before_dict_set_generator = true
-each_dict_entry_on_separate_line = false
-spaces_around_subscript_colon = true

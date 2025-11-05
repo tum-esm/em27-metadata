@@ -31,5 +31,4 @@ jobs:
 
       - name: Check whether code formatting is correct
         run: |
-          python -m yapf em27_metadata --recursive --quiet
-          python -m yapf tests --recursive --quiet
+          python -m ruff format --check
