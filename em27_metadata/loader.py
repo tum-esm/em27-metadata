@@ -132,12 +132,12 @@ def load_from_local_files(
     with open(sensors_path) as f:
         sensors = em27_metadata.types.SensorMetadataList.model_validate_json(f.read())
 
-    campaigns = em27_metadata.types.CampaignMetadataList()
+    campaigns = em27_metadata.types.CampaignMetadataList(root=[])
     if campaigns_path is not None:
         with open(campaigns_path) as f:
             campaigns = em27_metadata.types.CampaignMetadataList.model_validate_json(f.read())
 
-    events = em27_metadata.types.EventMetadataList()
+    events = em27_metadata.types.EventMetadataList(root=[])
     if events_path is not None:
         with open(events_path) as f:
             events = em27_metadata.types.EventMetadataList.model_validate_json(f.read())

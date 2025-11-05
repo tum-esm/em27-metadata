@@ -34,29 +34,29 @@ def test_explosion() -> None:
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T01:00:00+0000",
                         to_datetime="2020-02-01T09:59:59+0000",
-                        value=em27_metadata.types.Setup( # type: ignore
+                        value=em27_metadata.types.Setup(
                             lid="lid1", pds="A", utc_offset=3.7, profile_lid="lid2"
                         ),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T12:00:00+0000",
                         to_datetime="2020-02-01T21:59:59+0000",
-                        value=em27_metadata.types.Setup(lid="lid1", pds="B"), # type: ignore
+                        value=em27_metadata.types.Setup(lid="lid1", pds="B"),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-01T22:00:00+0000",
                         to_datetime="2020-02-03T22:59:59+0000",
-                        value=em27_metadata.types.Setup(lid="lid1", pds="C"), # type: ignore
+                        value=em27_metadata.types.Setup(lid="lid1", pds="C"),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-04T00:00:00+0000",
                         to_datetime="2020-02-04T20:59:59+0000",
-                        value=em27_metadata.types.Setup(lid="lid1", pds="D"), # type: ignore
+                        value=em27_metadata.types.Setup(lid="lid1", pds="D"),
                     ),
                     em27_metadata.types.SetupsListItem(
                         from_datetime="2020-02-04T22:00:00+0000",
                         to_datetime="2020-02-04T23:59:59+0000",
-                        value=em27_metadata.types.Setup(lid="lid1", pds="E"), # type: ignore
+                        value=em27_metadata.types.Setup(lid="lid1", pds="E"),
                     ),
                 ]
             ),

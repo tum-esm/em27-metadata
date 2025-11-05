@@ -31,7 +31,7 @@ def test_validation_alias() -> None:
         utc_offset=3,
         atmospheric_profile_location_id="4",
     )
-    s2 = Setup(  # type: ignore
+    s2 = Setup(
         lid="1",
         pds="2",
         utc_offset=3,
@@ -57,7 +57,7 @@ def test_validation_alias() -> None:
         to_datetime=datetime.datetime(2021, 1, 2, 23, 59, 59),
         value=s1,
     )
-    sli2 = SetupsListItem(  # type: ignore
+    sli2 = SetupsListItem(
         from_dt=datetime.datetime(2021, 1, 1),
         to_dt=datetime.datetime(2021, 1, 2, 23, 59, 59),
         v=s2,

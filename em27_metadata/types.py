@@ -218,10 +218,6 @@ class EventMetadata(TimeSeriesElement):
 class EventMetadataList(pydantic.RootModel[list[EventMetadata]]):
     root: list[EventMetadata]
 
-    @property
-    def location_ids(self: EventMetadataList) -> list[str]:
-        return [_l.location_ids for _l in self.root]
-
 
 class SensorDataContext(pydantic.BaseModel):
     sensor_id: str
